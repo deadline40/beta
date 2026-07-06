@@ -1,0 +1,70 @@
+/* css/terminal.css */
+
+#terminal {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: var(--terminal-height);
+  background: rgba(10, 13, 9, 0.95);
+  border-top: 2px solid var(--amber);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000; /* toujours au-dessus des fenêtres */
+}
+
+#terminal-output {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-sm) var(--space-md);
+  font-size: 0.85rem;
+}
+
+.terminal-line {
+  white-space: pre-wrap; /* respecte les \n renvoyés par les commandes */
+  line-height: 1.5;
+}
+
+.terminal-line--echo {
+  color: var(--text-dim);
+}
+
+.terminal-line--output {
+  color: var(--text);
+}
+
+#terminal-input-line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-top: 1px solid var(--line);
+}
+
+#terminal-prompt {
+  color: var(--amber);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+#terminal-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  caret-color: var(--amber);
+}
+
+/* Scrollbar cohérente avec les fenêtres */
+#terminal-output::-webkit-scrollbar {
+  width: 6px;
+}
+#terminal-output::-webkit-scrollbar-thumb {
+  background: var(--line);
+}
+#terminal-output::-webkit-scrollbar-thumb:hover {
+  background: var(--amber);
+}

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UMBRELLA // SHELL</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/windows.css">
+<link rel="stylesheet" href="css/terminal.css">
+<link rel="stylesheet" href="css/theme-umbrella.css">
+</head>
+<body>
+
+<div id="bg-grid"></div>
+<div id="scanline"></div>
+<div id="noise"></div>
+<div id="vignette"></div>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="brand glitch">UMBRELLA<span>::</span>SHELL</div>
+  <div class="status">
+    <div><span class="dot"></span><b>SYSTEME EN LIGNE</b></div>
+    <div>UPTIME <b id="uptime">00:00:00</b></div>
+    <div>ACCES <b>NIVEAU 5</b></div>
+  </div>
+  <div class="clockwrap">
+    <div class="clock" id="clock">00:00:00</div>
+    <div class="date" id="date">-- --- ----</div>
+  </div>
+</div>
+
+<!-- QUICK-LAUNCH DOCK -->
+<div id="dock">
+  <div class="dock-btn" data-open="database">DATABASE</div>
+  <div class="dock-btn" data-open="personnel">PERSONNEL</div>
+  <div class="dock-btn" data-open="camera">CAMERAS</div>
+  <div class="dock-btn" data-open="security">SECURITE</div>
+  <div class="dock-btn" data-open="archive">ARCHIVES</div>
+  <div class="dock-btn" data-open="allessa">ALESSA</div>
+</div>
+
+<!-- DESKTOP: app windows get injected here -->
+<div id="desktop"></div>
+
+<!-- TASKBAR -->
+<div id="taskbar"></div>
+
+<!-- TERMINAL -->
+<div id="terminal-window">
+  <div id="terminal-header">
+    <div class="brand">root@umbrella:~/shell</div>
+    <div>MAIN</div>
+  </div>
+  <div id="terminal-output"></div>
+  <div id="terminal-input-line">
+    <span id="terminal-prompt-label">&gt;</span>
+    <input id="terminal-input" type="text" autocomplete="off" spellcheck="false" placeholder="entrez une commande... (help)">
+  </div>
+</div>
+
+<!-- ================= JS — order matters (no build step, plain globals) ================= -->
+<script src="js/utils/dom.js"></script>
+<script src="js/utils/fuzzySearch.js"></script>
+
+<script src="js/core/eventBus.js"></script>
+<script src="js/core/commandRegistry.js"></script>
+<script src="js/core/commandParser.js"></script>
+<script src="js/core/windowManager.js"></script>
+<script src="js/core/terminal.js"></script>
+
+<script src="js/data/personnel.data.js"></script>
+<script src="js/data/archive.data.js"></script>
+<script src="js/data/security.data.js"></script>
+
+<script src="js/apps/database.js"></script>
+<script src="js/apps/personnel.js"></script>
+<script src="js/apps/camera.js"></script>
+<script src="js/apps/security.js"></script>
+<script src="js/apps/archive.js"></script>
+<script src="js/apps/allessa.js"></script>
+
+<script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+umbrella-shell/
+│
+├── index.html
+│
+├── css/
+│   ├── base.css          → reset, variables CSS (couleurs, fonts)
+│   ├── terminal.css       → style du terminal (input, historique, curseur)
+│   ├── windows.css        → style des fenêtres (draggable, minimisé, focus)
+│   └── theme-umbrella.css → glitch, scanlines, effets visuels spécifiques
+│
+├── js/
+│   ├── main.js             → point d'entrée, initialise tout
+│   │
+│   ├── core/
+│   │   ├── terminal.js      → capture input, affiche output, historique (flèches)
+│   │   ├── commandParser.js → parse le texte tapé → dispatch vers le bon handler
+│   │   ├── commandRegistry.js → objet {nom: fonction} de toutes les commandes dispo
+│   │   ├── windowManager.js → open/close/focus/minimize/list des fenêtres
+│   │   └── eventBus.js      → petit pub/sub (emit/on) pour communiquer entre modules
+│   │
+│   ├── apps/
+│   │   ├── database.js      → logique + rendu de la fenêtre Database
+│   │   ├── personnel.js     → logique + rendu de la fenêtre Personnel (+ search)
+│   │   ├── camera.js
+│   │   ├── security.js
+│   │   ├── archive.js
+│   │   └── allessa.js       → ton "AI" façon Alessa Wesker/Alexa maison
+│   │
+│   ├── data/
+│   │   ├── personnel.data.js → tableau JS des dossiers (simule une DB)
+│   │   ├── archive.data.js
+│   │   └── security.data.js
+│   │
+│   └── utils/
+│       ├── dom.js            → helpers pour créer des éléments DOM proprement
+│       └── fuzzySearch.js    → pour que `search "birkin"` marche même sans majuscule exacte
+│
+└── assets/
+    ├── fonts/
+    ├── icons/
+    └── sounds/                → bruit de frappe clavier, bip système (option sympa)
