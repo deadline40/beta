@@ -1,85 +1,112 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UMBRELLA // SHELL</title>
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/windows.css">
-<link rel="stylesheet" href="css/terminal.css">
-<link rel="stylesheet" href="css/theme-umbrella.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Umbrella Corp - Mainframe OS</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/theme-umbrella.css">
+    <link rel="stylesheet" href="css/terminal.css">
+    <link rel="stylesheet" href="css/windows.css">
 </head>
 <body>
+    <div id="mainframe-container">
+        
+        <aside class="sidebar" id="sidebar-left">
+            <section class="panel" id="system-status">
+                <h2 class="panel-title">SYSTEM STATUS</h2>
+                <div class="panel-content">
+                    <div class="status-row">CORE TEMP: <span id="sys-temp">42°C</span></div>
+                    <div class="status-row">ALERT LEVEL: <span id="sys-alert" class="alert-green">CLEAR</span></div>
+                    <div class="status-row">NETWORK: <span class="text-online">ONLINE</span></div>
+                    <div class="cpu-bar-container">
+                        <span>MAINFRAME LOAD:</span>
+                        <div class="progress-bar"><div id="cpu-bar" style="width: 14%;"></div></div>
+                    </div>
+                </div>
+            </section>
 
-<div id="bg-grid"></div>
-<div id="scanline"></div>
-<div id="noise"></div>
-<div id="vignette"></div>
+            <section class="panel" id="system-apps">
+                <h2 class="panel-title">SYSTEM APPLICATIONS</h2>
+                <div class="panel-content" style="gap: 6px; justify-content: flex-start; overflow-y: auto;">
+                    <button class="nav-btn" onclick="UmbrellaApps.triggerApp('personnel')">┌ USER REGISTRY ┐</button>
+                    <button class="nav-btn" onclick="UmbrellaApps.triggerApp('security')">┌ SECURITY LOGS ┐</button>
+                    <button class="nav-btn" onclick="UmbrellaApps.triggerApp('database')">┌ BIO-ARCHIVES  ┐</button>
+                    <button class="nav-btn" onclick="UmbrellaApps.triggerApp('network')">┌ NETWORK SCAN  ┐</button>
+                    <button class="nav-btn" onclick="UmbrellaApps.triggerApp('decryptor')">┌ FILE DECRYPTER┐</button>
+                </div>
+            </section>
+            
+            <section class="panel" id="user-info">
+                <h2 class="panel-title">OPERATOR PROFILE</h2>
+                <div class="panel-content">
+                    <div class="info-row">SYS TIME: <span id="clock" class="text-highlight">13:41:00</span></div>
+                    <div class="info-row">SYS DATE: <span id="date">06.07.2026</span></div>
+                    <div class="user-avatar">┌────────┐<br>│  [⚙️]  │<br>└────────┘</div>
+                    <div class="info-row">ID: <span class="text-highlight">U-4042</span></div>
+                    <div class="info-row">RANK: <span>SYS ADMIN / WEB DEV</span></div>
+                    <div class="info-row">LOC: <span>ANTANANARIVO HUB</span></div>
+                    <div class="info-row">CLEARANCE: <span id="user-clearance">LEVEL 1</span></div>
+                </div>
+            </section>
+        </aside>
 
-<!-- TOP BAR -->
-<div id="topbar">
-  <div class="brand glitch">UMBRELLA<span>::</span>SHELL</div>
-  <div class="status">
-    <div><span class="dot"></span><b>SYSTEME EN LIGNE</b></div>
-    <div>UPTIME <b id="uptime">00:00:00</b></div>
-    <div>ACCES <b>NIVEAU 5</b></div>
-  </div>
-  <div class="clockwrap">
-    <div class="clock" id="clock">00:00:00</div>
-    <div class="date" id="date">-- --- ----</div>
-  </div>
-</div>
+        <main id="center-zone">
+            <div id="terminal-container">
+                <div id="terminal-output"></div>
+                <div id="terminal-input-line">
+                    <span id="terminal-prompt">UMBRELLA@ROOT_></span>
+                    <input type="text" id="terminal-input" autofocus autocomplete="off">
+                </div>
+            </div>
+            
+            <div id="terminal-animations-panel">
+                <div class="anim-sub-panel">
+                    <div class="anim-panel-title">⚡ SYSTEM MATRIX STREAM</div>
+                    <div id="stream-infinite-code" class="anim-panel-body text-online"></div>
+                </div>
+                <div class="anim-sub-panel">
+                    <div class="anim-panel-title">⚙️ AUTO-COMPILER ACTIVE</div>
+                    <div id="stream-auto-writer" class="anim-panel-body" style="color: #ffaa00;"></div>
+                </div>
+                <div class="anim-sub-panel">
+                    <div class="anim-panel-title">👤 OPERATOR ACTIVITY LOG</div>
+                    <div id="stream-user-activity" class="anim-panel-body" style="color: #ffffff;"></div>
+                </div>
+            </div>
 
-<!-- QUICK-LAUNCH DOCK -->
-<div id="dock">
-  <div class="dock-btn" data-open="database">DATABASE</div>
-  <div class="dock-btn" data-open="personnel">PERSONNEL</div>
-  <div class="dock-btn" data-open="camera">CAMERAS</div>
-  <div class="dock-btn" data-open="security">SECURITE</div>
-  <div class="dock-btn" data-open="archive">ARCHIVES</div>
-  <div class="dock-btn" data-open="allessa">ALESSA</div>
-</div>
+            <div id="window-layer"></div>
+        </main>
 
-<!-- DESKTOP: app windows get injected here -->
-<div id="desktop"></div>
+        <aside class="sidebar" id="sidebar-right">
+            <section class="panel" id="camera-feed">
+                <h2 class="panel-title">SURVEILLANCE FEED</h2>
+                <div class="panel-content" style="padding:0; position:relative; flex:1;">
+                    <canvas id="cam-canvas"></canvas>
+                    <div id="cam-label" style="position:absolute; bottom:10px; left:10px; background:rgba(0,0,0,0.7); padding:2px 5px; font-size:10px;">FEED: STABLE</div>
+                </div>
+            </section>
+            
+            <section class="panel" id="world-map">
+                <h2 class="panel-title">GEOSPATIAL TRACKING</h2>
+                <div class="panel-content" style="padding:0; position:relative; flex:1;">
+                    <canvas id="map-canvas"></canvas>
+                </div>
+            </section>
+        </aside>
 
-<!-- TASKBAR -->
-<div id="taskbar"></div>
+    </div>
 
-<!-- TERMINAL -->
-<div id="terminal-window">
-  <div id="terminal-header">
-    <div class="brand">root@umbrella:~/shell</div>
-    <div>MAIN</div>
-  </div>
-  <div id="terminal-output"></div>
-  <div id="terminal-input-line">
-    <span id="terminal-prompt-label">&gt;</span>
-    <input id="terminal-input" type="text" autocomplete="off" spellcheck="false" placeholder="entrez une commande... (help)">
-  </div>
-</div>
-
-<!-- ================= JS — order matters (no build step, plain globals) ================= -->
-<script src="js/utils/dom.js"></script>
-<script src="js/utils/fuzzySearch.js"></script>
-
-<script src="js/core/eventBus.js"></script>
-<script src="js/core/commandRegistry.js"></script>
-<script src="js/core/commandParser.js"></script>
-<script src="js/core/windowManager.js"></script>
-<script src="js/core/terminal.js"></script>
-
-<script src="js/data/personnel.data.js"></script>
-<script src="js/data/archive.data.js"></script>
-<script src="js/data/security.data.js"></script>
-
-<script src="js/apps/database.js"></script>
-<script src="js/apps/personnel.js"></script>
-<script src="js/apps/camera.js"></script>
-<script src="js/apps/security.js"></script>
-<script src="js/apps/archive.js"></script>
-<script src="js/apps/allessa.js"></script>
-
-<script src="js/main.js"></script>
+    <script src="js/utils/dom.js"></script>
+    <script src="js/utils/fuzzySearch.js"></script>
+    <script src="js/core/eventBus.js"></script>
+    <script src="js/core/commandRegistry.js"></script>
+    <script src="js/core/commandParser.js"></script>
+    <script src="js/core/windowManager.js"></script>
+    <script src="js/core/terminal.js"></script>
+    
+    <script src="js/core/multimedia.js"></script>
+    <script src="js/core/appsManager.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>

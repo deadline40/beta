@@ -1,53 +1,176 @@
-/* ============================================================
-   BASE — reset & tokens
-   ============================================================ */
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap');
-
-:root {
-  /* Umbrella Corp palette */
-  --red:        #e2001a;
-  --red-dim:    #6e0510;
-  --red-dk:     #2a0206;
-  --amber:      #ffb02e;
-  --bone:       #d8d2c4;
-  --bg:         #05060a;
-  --panel-bg:   rgba(10,6,8,0.86);
-  --panel-edge: #3a1014;
-  --text-dim:   #8a6b6b;
-  --text:       #d8d2c4;
-  --ok:         #7cff9c;
-  --font-display: 'Orbitron', sans-serif;
-  --font-mono: 'Share Tech Mono', monospace;
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-html, body {
-  width: 100%; height: 100%;
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-mono);
-  overflow: hidden;
+body, html {
+    width: 100%;
+    height: 100%;
+    background-color: #050505;
+    font-family: 'Courier New', Courier, monospace;
+    color: #a0a0a0;
+    overflow: hidden;
 }
 
-button, input {
-  font-family: inherit;
-  color: inherit;
-  background: none;
-  border: none;
-  outline: none;
+/* Organisation en 3 colonnes */
+#mainframe-container {
+    display: grid;
+    grid-template-columns: 260px 1fr 300px;
+    width: 100vw;
+    height: 100vh;
+    gap: 10px;
+    padding: 10px;
+    background: #020202;
 }
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-thumb { background: var(--red-dim); }
-::-webkit-scrollbar-track { background: transparent; }
-
-a { color: var(--red); }
-
-#desktop {
-  position: relative;
-  width: 100vw; height: 100vh;
-  overflow: hidden;
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 100%;
 }
 
-.hidden { display: none !important; }
+.panel {
+    flex: 1;
+    background: rgba(10, 10, 10, 0.9);
+    border: 1px solid #252525;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.panel-title {
+    background: #141414;
+    color: #ff3333;
+    font-size: 0.85rem;
+    padding: 6px 10px;
+    border-bottom: 1px solid #252525;
+    letter-spacing: 1px;
+    font-weight: bold;
+}
+
+.panel-content {
+    padding: 10px;
+    flex: 1;
+    font-size: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#center-zone {
+    position: relative;
+    border: 1px solid #252525;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Barrettes de progression */
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #151515;
+    margin-top: 4px;
+    border: 1px solid #333;
+}
+
+#cpu-bar {
+    height: 100%;
+    background: #ff3333;
+    transition: width 0.4s ease;
+}
+
+.status-row, .info-row {
+    margin-bottom: 2px;
+}
+
+.text-highlight { color: #ffffff; }
+.text-online { color: #00ff00; }
+.alert-green { color: #00ff00; font-weight: bold; }
+.alert-yellow { color: #ffaa00; font-weight: bold; }
+.alert-red { color: #ff0000; font-weight: bold; animation: coreBlink 1s infinite; }
+
+@keyframes coreBlink { 50% { opacity: 0.3; } }
+
+canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.user-avatar {
+    font-family: monospace;
+    color: #444;
+    line-height: 1.1;
+    margin: 5px 0;
+}
+
+/* --- BOUTONS DES APPLICATIONS DE LA SIDEBAR --- */
+.nav-btn {
+    background: #0a0a0a;
+    color: #ff3333;
+    border: 1px solid #444;
+    padding: 8px 12px;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: left;
+    letter-spacing: 1px;
+    transition: all 0.2s ease;
+}
+
+.nav-btn:hover {
+    background: #ff3333;
+    color: #000000;
+    box-shadow: 0 0 10px rgba(255, 51, 51, 0.4);
+    border-color: #ff3333;
+}
+
+.nav-btn:active {
+    transform: scale(0.98);
+}
+
+/* --- PANNEAU DES ANIMATIONS INFÉRIEURES (AGRANDI & FIXÉ EN BAS) --- */
+#terminal-animations-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    height: 180px; /* Passage de 110px à 180px pour plus de visibilité */
+    background: #020202;
+    border-top: 2px solid #ff3333; /* Bordure rouge Umbrella bien distincte */
+    gap: 8px;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.anim-sub-panel {
+    background: #040404;
+    border: 1px solid #222;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.anim-panel-title {
+    background: #0f0f0f;
+    color: #ff3333;
+    font-size: 11px; /* Texte plus grand */
+    padding: 5px 8px;
+    border-bottom: 1px solid #222;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+.anim-panel-body {
+    padding: 6px;
+    font-size: 11px; /* Texte du code plus grand et plus lisible */
+    font-family: 'Courier New', monospace;
+    line-height: 1.3;
+    flex: 1;
+    overflow-y: hidden;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
