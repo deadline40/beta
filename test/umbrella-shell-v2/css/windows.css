@@ -1,6 +1,17 @@
 /* ============================================================
    WINDOWS — draggable app windows, taskbar
    ============================================================ */
+
+/* Floating layer for the classic window system (opened via "open <app>").
+   Sits above the whole mainframe UI; transparent and click-through
+   except where an actual window is rendered. */
+#desktop {
+  position: fixed;
+  inset: 0;
+  z-index: 850;
+  pointer-events: none;
+}
+
 .app-window {
   position: absolute;
   min-width: 340px;
@@ -13,6 +24,7 @@
   z-index: 10;
   box-shadow: 0 10px 40px rgba(0,0,0,0.6);
   transition: box-shadow 0.2s;
+  pointer-events: auto;
 }
 
 .app-window.focused {
@@ -67,19 +79,21 @@
   background: linear-gradient(135deg, transparent 50%, var(--panel-edge) 50%);
 }
 
-/* TASKBAR */
+/* TASKBAR — floats above everything, only visible once a classic window is open */
 #taskbar {
   position: fixed;
-  left: 0; right: 0; bottom: 260px;
-  height: 30px;
+  left: 0; right: 0; bottom: 0;
+  height: 28px;
   display: flex; align-items: center; gap: 8px;
   padding: 0 14px;
-  background: rgba(10,6,8,0.9);
+  background: rgba(10,6,8,0.92);
   border-top: 1px solid var(--panel-edge);
-  z-index: 400;
+  z-index: 860;
   font-size: 0.62rem;
   letter-spacing: 1px;
+  pointer-events: auto;
 }
+#taskbar:empty { display: none; }
 
 .taskbar-item {
   padding: 3px 10px;

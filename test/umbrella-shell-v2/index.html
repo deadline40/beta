@@ -7,9 +7,17 @@
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/theme-umbrella.css">
     <link rel="stylesheet" href="css/terminal.css">
-    <link rel="stylesheet" href="css/windows.css">
-</head>
+    <link rel="stylesheet" href="css/windows.css"></head>
 <body>
+    <div id="bg-grid"></div>
+    <div id="scanline"></div>
+    <div id="noise"></div>
+    <div id="vignette"></div>
+
+    <!-- classic draggable-window layer (opened via "open <app>" in the terminal) -->
+    <div id="desktop"></div>
+    <div id="taskbar"></div>
+
     <div id="mainframe-container">
         
         <aside class="sidebar" id="sidebar-left">
@@ -52,6 +60,10 @@
         </aside>
 
         <main id="center-zone">
+            <div id="hologram-logo">
+                <img src="assets/images/umbrella.jpg" alt="Umbrella Corp">
+            </div>
+        
             <div id="terminal-container">
                 <div id="terminal-output"></div>
                 <div id="terminal-input-line">
@@ -59,22 +71,7 @@
                     <input type="text" id="terminal-input" autofocus autocomplete="off">
                 </div>
             </div>
-            
-            <div id="terminal-animations-panel">
-                <div class="anim-sub-panel">
-                    <div class="anim-panel-title">⚡ SYSTEM MATRIX STREAM</div>
-                    <div id="stream-infinite-code" class="anim-panel-body text-online"></div>
-                </div>
-                <div class="anim-sub-panel">
-                    <div class="anim-panel-title">⚙️ AUTO-COMPILER ACTIVE</div>
-                    <div id="stream-auto-writer" class="anim-panel-body" style="color: #ffaa00;"></div>
-                </div>
-                <div class="anim-sub-panel">
-                    <div class="anim-panel-title">👤 OPERATOR ACTIVITY LOG</div>
-                    <div id="stream-user-activity" class="anim-panel-body" style="color: #ffffff;"></div>
-                </div>
-            </div>
-
+        
             <div id="window-layer"></div>
         </main>
 
@@ -95,6 +92,22 @@
             </section>
         </aside>
 
+        <!-- FOOTER : pleine largeur, sous les 3 colonnes -->
+        <div id="terminal-animations-panel">
+            <div class="anim-sub-panel">
+                <div class="anim-panel-title">⚡ SYSTEM MATRIX STREAM</div>
+                <div id="stream-infinite-code" class="anim-panel-body text-online"></div>
+            </div>
+            <div class="anim-sub-panel">
+                <div class="anim-panel-title">⚙️ AUTO-COMPILER ACTIVE</div>
+                <div id="stream-auto-writer" class="anim-panel-body" style="color: #ffaa00;"></div>
+            </div>
+            <div class="anim-sub-panel">
+                <div class="anim-panel-title">👤 OPERATOR ACTIVITY LOG</div>
+                <div id="stream-user-activity" class="anim-panel-body" style="color: #ffffff;"></div>
+            </div>
+        </div>
+
     </div>
 
     <script src="js/utils/dom.js"></script>
@@ -104,7 +117,18 @@
     <script src="js/core/commandParser.js"></script>
     <script src="js/core/windowManager.js"></script>
     <script src="js/core/terminal.js"></script>
-    
+
+    <!-- classic app data + windows (additional feature, reachable via "open <name>") -->
+    <script src="js/data/personnel.data.js"></script>
+    <script src="js/data/archive.data.js"></script>
+    <script src="js/data/security.data.js"></script>
+    <script src="js/apps/database.js"></script>
+    <script src="js/apps/personnel.js"></script>
+    <script src="js/apps/camera.js"></script>
+    <script src="js/apps/security.js"></script>
+    <script src="js/apps/archive.js"></script>
+    <script src="js/apps/allessa.js"></script>
+
     <script src="js/core/multimedia.js"></script>
     <script src="js/core/appsManager.js"></script>
     <script src="js/main.js"></script>

@@ -243,11 +243,26 @@ const UmbrellaApps = {
     registerAppCommands() {
         if (typeof CommandRegistry === 'undefined' || !CommandRegistry.register) return;
         const self = this;
-        CommandRegistry.register('personnel', { run() { self.triggerApp('personnel'); return "Exécution..."; } });
-        CommandRegistry.register('security', { run() { self.triggerApp('security'); return "Exécution..."; } });
-        CommandRegistry.register('database', { run() { self.triggerApp('database'); return "Exécution..."; } });
-        CommandRegistry.register('network', { run() { self.triggerApp('network'); return "Exécution..."; } });
-        CommandRegistry.register('decryptor', { run() { self.triggerApp('decryptor'); return "Exécution..."; } });
+        CommandRegistry.register('personnel', 'ouvre le registre du personnel (mainframe)', (args, term) => {
+            self.triggerApp('personnel');
+            term.print('ok', 'Exécution...');
+        });
+        CommandRegistry.register('security', 'ouvre les logs de sécurité (mainframe)', (args, term) => {
+            self.triggerApp('security');
+            term.print('ok', 'Exécution...');
+        });
+        CommandRegistry.register('database', 'ouvre les bio-archives (mainframe)', (args, term) => {
+            self.triggerApp('database');
+            term.print('ok', 'Exécution...');
+        });
+        CommandRegistry.register('network', 'lance le scanner réseau (mainframe)', (args, term) => {
+            self.triggerApp('network');
+            term.print('ok', 'Exécution...');
+        });
+        CommandRegistry.register('decryptor', 'ouvre le décrypteur de fichiers (mainframe)', (args, term) => {
+            self.triggerApp('decryptor');
+            term.print('ok', 'Exécution...');
+        });
     }
 };
 

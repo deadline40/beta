@@ -1,3 +1,20 @@
+:root {
+    /* compatibility variables for the classic window system (windows.css)
+       and visual effects (theme-umbrella.css) — mapped to match the
+       colors already used across the new mainframe design. */
+    --red:        #ff3333;
+    --red-dim:    #7a1414;
+    --red-dk:     #200606;
+    --amber:      #ffaa00;
+    --bone:       #d8d2c4;
+    --panel-bg:   rgba(10, 10, 10, 0.92);
+    --panel-edge: #333333;
+    --text-dim:   #808080;
+    --ok:         #00ff00;
+    --font-display: 'Courier New', monospace;
+    --font-mono:  'Courier New', monospace;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -13,10 +30,11 @@ body, html {
     overflow: hidden;
 }
 
-/* Organisation en 3 colonnes */
+/* Organisation en 3 colonnes + footer pleine largeur */
 #mainframe-container {
     display: grid;
     grid-template-columns: 260px 1fr 300px;
+    grid-template-rows: 1fr auto;
     width: 100vw;
     height: 100vh;
     gap: 10px;
@@ -24,11 +42,16 @@ body, html {
     background: #020202;
 }
 
+#sidebar-left  { grid-column: 1; grid-row: 1; }
+#center-zone   { grid-column: 2; grid-row: 1; }
+#sidebar-right { grid-column: 3; grid-row: 1; }
+
 .sidebar {
     display: flex;
     flex-direction: column;
     gap: 10px;
     height: 100%;
+    min-height: 0;
 }
 
 .panel {
@@ -66,6 +89,7 @@ body, html {
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-height: 0;
 }
 
 /* Barrettes de progression */
@@ -134,11 +158,13 @@ canvas {
     transform: scale(0.98);
 }
 
-/* --- PANNEAU DES ANIMATIONS INFÉRIEURES (AGRANDI & FIXÉ EN BAS) --- */
+/* --- FOOTER : bandeau d'animations, pleine largeur, tout en bas --- */
 #terminal-animations-panel {
+    grid-column: 1 / -1;
+    grid-row: 2;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    height: 180px; /* Passage de 110px à 180px pour plus de visibilité */
+    height: 180px;
     background: #020202;
     border-top: 2px solid #ff3333; /* Bordure rouge Umbrella bien distincte */
     gap: 8px;
@@ -174,17 +200,3 @@ canvas {
     white-space: pre-wrap;
     word-break: break-all;
 }
-
-#terminal-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-#terminal-output {
-    flex: 1;
-    overflow-y: auto;
-}
-
-

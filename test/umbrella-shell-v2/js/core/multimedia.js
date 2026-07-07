@@ -201,36 +201,39 @@ const UmbrellaMainframe = {
     registerCommands() {
         if (typeof CommandRegistry === 'undefined') return;
 
-        CommandRegistry.register('cam', {
-            description: 'Gestion des caméras de surveillance.',
-            execute(args) {
-                if (!args || args.length === 0) return "Usage: cam switch [1-4] ou cam list";
-                const sub = args[0].toLowerCase();
-                if (sub === 'list') {
-                    return "Caméras:\n 1: LAB-SECTOR_7\n 2: SERVER_MAIN\n 3: CORRIDOR_W\n 4: MAIN_GATE";
-                }
-                if (sub === 'switch' && args[1]) {
-                    const id = parseInt(args[1], 10);
-                    if (id >= 1 && id <= 4) {
-                        UmbrellaMainframe.switchCamera(id);
-                        return `Connexion forcée sur CAM-0${id}...`;
-                    }
-                }
-                return "ID invalide.";
+        CommandRegistry.register('cam', 'gestion des caméras de surveillance: cam list | cam switch <1-4>', (args, term) => {
+            if (!args || args.length === 0) return term.print('err', 'usage : cam switch [1-4] ou cam list');
+            const sub = args[0].toLowerCase();
+            if (sub === 'list') {
+                term.printLines([
+                    { t: 'res', v: 'Caméras :' },
+                    { t: 'res', v: ' 1: LAB-SECTOR_7' },
+                    { t: 'res', v: ' 2: SERVER_MAIN' },
+                    { t: 'res', v: ' 3: CORRIDOR_W' },
+                    { t: 'res', v: ' 4: MAIN_GATE' }
+                ]);
+                return;
             }
+            if (sub === 'switch' && args[1]) {
+                const id = parseInt(args[1], 10);
+                if (id >= 1 && id <= 4) {
+                    UmbrellaMainframe.switchCamera(id);
+                    term.print('ok', `Connexion forcée sur CAM-0${id}...`);
+                    return;
+                }
+            }
+            term.print('err', 'ID invalide.');
         });
 
-        CommandRegistry.register('sys', {
-            description: 'Alerte système.',
-            execute(args) {
-                if (args && args[0] === 'alert' && args[1]) {
-                    if (typeof EventBus !== 'undefined') {
-                        EventBus.emit('system:alertChange', args[1]);
-                        return `Alerte passée en mode: ${args[1].toUpperCase()}`;
-                    }
+        CommandRegistry.register('sys', 'alerte système: sys alert <green|yellow|red>', (args, term) => {
+            if (args && args[0] === 'alert' && args[1]) {
+                if (typeof EventBus !== 'undefined') {
+                    EventBus.emit('system:alertChange', args[1]);
+                    term.print('ok', `Alerte passée en mode: ${args[1].toUpperCase()}`);
+                    return;
                 }
-                return "Usage: sys alert [green/yellow/red]";
             }
+            term.print('err', 'usage : sys alert [green/yellow/red]');
         });
     }
 };
