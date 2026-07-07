@@ -117,11 +117,11 @@
 .dossier-item .d-name { color: var(--bone); font-size: 0.74rem; }
 .dossier-item .d-meta { color: var(--text-dim); font-size: 0.64rem; }
 
-.cam-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.cam-feed { position: relative; border: 1px solid var(--panel-edge); overflow: hidden; }
-.cam-feed video, .cam-feed img { width: 100%; height: 110px; object-fit: cover; filter: grayscale(0.5) brightness(0.8); display: block; }
-.cam-feed .cam-label { position: absolute; top: 4px; left: 6px; font-size: 0.6rem; color: var(--red); background: rgba(0,0,0,0.5); padding: 1px 5px; letter-spacing: 1px; }
-.cam-feed .cam-rec { position: absolute; top: 4px; right: 6px; font-size: 0.55rem; color: var(--ok); }
+.cam-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px; }
+.cam-feed { position: relative; border: 1px solid var(--panel-edge); overflow: hidden; min-height: 90px; background: #060606; }
+.cam-feed video, .cam-feed img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(0.4) brightness(0.85); display: block; }
+.cam-feed .cam-label { position: absolute; top: 6px; left: 6px; font-size: 0.7rem; color: var(--red); background: rgba(0,0,0,0.65); padding: 2px 6px; letter-spacing: 1px; z-index: 2; }
+.cam-feed .cam-rec { position: absolute; top: 6px; right: 6px; font-size: 0.55rem; color: var(--ok); }
 
 .log-line { font-size: 0.7rem; color: var(--text-dim); padding: 2px 0; border-bottom: 1px dashed var(--panel-edge); }
 .log-line.warn { color: var(--amber); }

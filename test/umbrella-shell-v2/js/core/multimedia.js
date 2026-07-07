@@ -47,11 +47,15 @@ const UmbrellaMainframe = {
 
     // --- FLUX MULTI-CAMÉRAS ---
     initCamera() {
-        this.camCanvas = document.getElementById('cam-canvas');
-        if (!this.camCanvas) return;
-        this.camCtx = this.camCanvas.getContext('2d');
-        this.camLabel = document.getElementById('cam-label');
-        this.camId = 1;
+        this.camVideos = Array.from(document.querySelectorAll('#camera-feed .cam-video'));
+        this.camLabels = Array.from(document.querySelectorAll('#camera-feed .cam-label'));
+        if (!this.camVideos.length) return;
+
+        this.videoSources = [
+            'assets/videos/1105533363-preview.mp4',
+            'assets/videos/3510927063-preview.mp4',
+            'assets/videos/3788587813-preview.mp4'
+        ];
 
         this.cameraZones = {
             1: { name: "LAB-SECTOR_7", info: "BIO-HAZARD ACC", alert: true },
@@ -60,73 +64,46 @@ const UmbrellaMainframe = {
             4: { name: "MAIN_GATE", info: "EXTERNAL TRACK", alert: false }
         };
 
-        // Rotation auto toutes les 6 sec
-        setInterval(() => {
-            let next = this.camId + 1;
-            if (next > 4) next = 1;
-            this.switchCamera(next);
-        }, 6000);
+        this.camVideos.forEach((video) => {
+            video.autoplay = true;
+            video.muted = true;
+            video.loop = true;
+            video.playsInline = true;
+            video.style.objectFit = 'cover';
+        });
 
-        this.resizeCanvas();
-        this.animateCamera();
+        this.loadRandomVideos();
+        setInterval(() => this.loadRandomVideos(), 10000);
     },
 
-    animateCamera() {
-        if (!this.camCtx) return;
-        const ctx = this.camCtx;
-        const w = this.camCanvas.width;
-        const h = this.camCanvas.height;
-        const zone = this.cameraZones[this.camId];
+    loadRandomVideos() {
+        if (!this.camVideos.length) return;
+        const shuffled = [...this.videoSources].sort(() => Math.random() - 0.5);
 
-        ctx.fillStyle = zone.alert ? '#120202' : '#030a05';
-        ctx.fillRect(0, 0, w, h);
-
-        // Dessin des pièces
-        ctx.strokeStyle = zone.alert ? 'rgba(255,0,0,0.2)' : 'rgba(0,255,100,0.15)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        if (this.camId % 2 === 1) {
-            ctx.rect(w*0.3, h*0.3, w*0.4, h*0.4);
-            ctx.moveTo(0,0); ctx.lineTo(w*0.3, h*0.3);
-            ctx.moveTo(w,0); ctx.lineTo(w*0.7, h*0.3);
-            ctx.moveTo(0,h); ctx.lineTo(w*0.3, h*0.7);
-            ctx.moveTo(w,h); ctx.lineTo(w*0.7, h*0.7);
-        } else {
-            for(let i=1; i<4; i++) ctx.strokeRect(w*(0.2*i), h*0.2, w*0.15, h*0.6);
-        }
-        ctx.stroke();
-
-        // Bruit vidéo satellite
-        const imgData = ctx.getImageData(0, 0, w, h);
-        const d = imgData.data;
-        const noise = Math.random() > 0.98 ? 140 : 25;
-        for (let i = 0; i < d.length; i += 4) {
-            let n = (Math.random() - 0.5) * noise;
-            d[i] = Math.min(255, Math.max(0, d[i] + n + (zone.alert?20:0)));
-            d[i+1] = Math.min(255, Math.max(0, d[i+1] + n + (zone.alert?0:15)));
-            d[i+2] = Math.min(255, Math.max(0, d[i+2] + n));
-        }
-        ctx.putImageData(imgData, 0, 0);
-
-        // HUD Texte
-        ctx.fillStyle = zone.alert ? '#ff3333' : '#00ff00';
-        ctx.font = '9px monospace';
-        ctx.fillText(`● FEED_LIVE [CAM-0${this.camId}]`, 10, 15);
-        ctx.fillText(`LOC: ${zone.name}`, 10, 28);
-        ctx.fillText(`SYS: ${zone.info}`, 10, h - 10);
-
-        if (this.camLabel) this.camLabel.textContent = `CAM: ${zone.name}`;
-        requestAnimationFrame(() => this.animateCamera());
+        this.camVideos.forEach((video, idx) => {
+            const nextSource = shuffled[idx % shuffled.length];
+            if (video.src && video.src.includes(nextSource)) return;
+            video.src = nextSource;
+            video.play().catch(() => {});
+            const labelText = this.camLabels[idx] ? `FEED ${String(idx + 1).padStart(2, '0')} • ${nextSource.split('/').pop()}` : null;
+            if (labelText && this.camLabels[idx]) {
+                this.camLabels[idx].textContent = labelText;
+            }
+        });
     },
 
     switchCamera(id) {
-        if (this.cameraZones[id]) {
-            this.camId = id;
-            if (this.camCtx) {
-                this.camCtx.fillStyle = '#ffffff';
-                this.camCtx.fillRect(0, 0, this.camCanvas.width, this.camCanvas.height);
+        if (!this.camVideos.length) return;
+        const zone = this.cameraZones[id];
+        if (!zone) return;
+        this.camVideos.forEach((video, idx) => {
+            const source = this.videoSources[(id - 1 + idx) % this.videoSources.length];
+            video.src = source;
+            video.play().catch(() => {});
+            if (this.camLabels[idx]) {
+                this.camLabels[idx].textContent = `CAM-${id} ${zone.name} • ${source.split('/').pop()}`;
             }
-        }
+        });
     },
 
     // Globe remplacé par worldmap.js — plus de rendu ici
@@ -134,9 +111,9 @@ const UmbrellaMainframe = {
     animateGlobe() {},
 
     resizeCanvas() {
-        if (this.camCanvas) {
-            this.camCanvas.width = this.camCanvas.parentElement.clientWidth;
-            this.camCanvas.height = this.camCanvas.parentElement.clientHeight;
+        if (this.camVideo) {
+            this.camVideo.style.width = '100%';
+            this.camVideo.style.height = '100%';
         }
         // map-canvas géré par worldmap.js
     },

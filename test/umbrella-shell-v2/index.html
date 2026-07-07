@@ -98,9 +98,23 @@
         <aside class="sidebar" id="sidebar-right">
             <section class="panel" id="camera-feed">
                 <h2 class="panel-title">SURVEILLANCE FEED</h2>
-                <div class="panel-content" style="padding:0; position:relative; flex:1;">
-                    <canvas id="cam-canvas"></canvas>
-                    <div id="cam-label" style="position:absolute; bottom:10px; left:10px; background:rgba(0,0,0,0.7); padding:2px 5px; font-size:10px;">FEED: STABLE</div>
+                <div class="panel-content cam-grid" style="padding:10px; gap:10px; display:grid; grid-template-columns: 1fr 1fr;">
+                    <div class="cam-feed">
+                        <video class="cam-video" autoplay muted loop playsinline></video>
+                        <div class="cam-label">LOADING FEED 01</div>
+                    </div>
+                    <div class="cam-feed">
+                        <video class="cam-video" autoplay muted loop playsinline></video>
+                        <div class="cam-label">LOADING FEED 02</div>
+                    </div>
+                    <div class="cam-feed">
+                        <video class="cam-video" autoplay muted loop playsinline></video>
+                        <div class="cam-label">LOADING FEED 03</div>
+                    </div>
+                    <div class="cam-feed">
+                        <video class="cam-video" autoplay muted loop playsinline></video>
+                        <div class="cam-label">LOADING FEED 04</div>
+                    </div>
                 </div>
             </section>
             

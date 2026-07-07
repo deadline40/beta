@@ -84,6 +84,11 @@ const UmbrellaWorldMap = (() => {
   let mobiles = MOBILES.map(m => ({ ...m }));
 
   // ── UTILITAIRES MERCATOR ─────────────────────────────────────────────────
+  const STAR_COUNT = 90;
+  const SEA_PARTICLES = 220;
+  let starField = [];
+  let seaTextureCanvas = null;
+
   function project(lat, lon, w, h) {
     const x = ((lon + 180) / 360) * w;
     const latRad = lat * Math.PI / 180;
@@ -92,37 +97,110 @@ const UmbrellaWorldMap = (() => {
     return { x, y };
   }
 
-  // ── DESSIN CARTE ─────────────────────────────────────────────────────────
+  function ensureBackgroundAssets(w, h) {
+    if (!seaTextureCanvas || seaTextureCanvas.width !== w || seaTextureCanvas.height !== h) {
+      starField = Array.from({ length: STAR_COUNT }, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: 0.5 + Math.random() * 1.4,
+        a: 0.08 + Math.random() * 0.25,
+      }));
+
+      seaTextureCanvas = document.createElement('canvas');
+      seaTextureCanvas.width = w;
+      seaTextureCanvas.height = h;
+      const tx = seaTextureCanvas.getContext('2d');
+      tx.clearRect(0, 0, w, h);
+      tx.fillStyle = 'rgba(255,255,255,0.06)';
+      for (let i = 0; i < SEA_PARTICLES; i++) {
+        const x = Math.random() * w;
+        const y = Math.random() * h;
+        const size = 0.8 + Math.random() * 1.4;
+        tx.beginPath();
+        tx.arc(x, y, size, 0, Math.PI * 2);
+        tx.fill();
+      }
+    }
+  }
+
+  function drawStarfield() {
+    ctx.save();
+    for (const star of starField) {
+      ctx.globalAlpha = star.a;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawSeaTexture(w, h) {
+    if (!seaTextureCanvas) return;
+    ctx.save();
+    ctx.globalAlpha = 0.08;
+    ctx.drawImage(seaTextureCanvas, 0, 0, w, h);
+    ctx.restore();
+  }
+
   function drawMap(w, h) {
-    // Fond spatial
-    ctx.fillStyle = '#050a08';
+    ensureBackgroundAssets(w, h);
+
+    const ocean = ctx.createLinearGradient(0, 0, 0, h);
+    ocean.addColorStop(0, '#07121d');
+    ocean.addColorStop(0.5, '#05121d');
+    ocean.addColorStop(1, '#02060d');
+    ctx.fillStyle = ocean;
     ctx.fillRect(0, 0, w, h);
 
-    // Grille lat/lon
-    ctx.strokeStyle = 'rgba(255,51,51,0.06)';
+    const glow = ctx.createRadialGradient(w * 0.65, h * 0.3, 20, w * 0.65, h * 0.3, w * 0.9);
+    glow.addColorStop(0, 'rgba(0, 170, 255, 0.12)');
+    glow.addColorStop(0.7, 'rgba(0, 40, 70, 0.00)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, w, h);
+
+    drawSeaTexture(w, h);
+    drawStarfield();
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
     ctx.lineWidth = 0.5;
     for (let lon = -180; lon <= 180; lon += 30) {
       const p1 = project(85, lon, w, h);
       const p2 = project(-85, lon, w, h);
-      ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.stroke();
     }
     for (let lat = -60; lat <= 60; lat += 30) {
       const p1 = project(lat, -180, w, h);
       const p2 = project(lat, 180, w, h);
-      ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.stroke();
     }
-    // Équateur
-    ctx.strokeStyle = 'rgba(255,51,51,0.14)';
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
     ctx.lineWidth = 0.8;
     const eq1 = project(0, -180, w, h);
-    const eq2 = project(0,  180, w, h);
-    ctx.beginPath(); ctx.moveTo(eq1.x, eq1.y); ctx.lineTo(eq2.x, eq2.y); ctx.stroke();
+    const eq2 = project(0, 180, w, h);
+    ctx.beginPath();
+    ctx.moveTo(eq1.x, eq1.y);
+    ctx.lineTo(eq2.x, eq2.y);
+    ctx.stroke();
 
-    // Continents
-    ctx.fillStyle   = 'rgba(30,50,35,0.88)';
-    ctx.strokeStyle = 'rgba(0,255,100,0.20)';
-    ctx.lineWidth   = 0.8;
     for (const cont of CONTINENTS) {
+      const landShading = ctx.createLinearGradient(0, 0, 0, h);
+      landShading.addColorStop(0, '#5a8c63');
+      landShading.addColorStop(0.4, '#2f5634');
+      landShading.addColorStop(1, '#101e13');
+
+      ctx.fillStyle = landShading;
+      ctx.strokeStyle = 'rgba(150, 230, 170, 0.18)';
+      ctx.lineWidth = 1;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
+      ctx.shadowBlur = 10;
       ctx.beginPath();
       cont.pts.forEach(([lon, lat], i) => {
         const p = project(lat, lon, w, h);
@@ -130,6 +208,17 @@ const UmbrellaWorldMap = (() => {
       });
       ctx.closePath();
       ctx.fill();
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.lineWidth = 0.4;
+      ctx.beginPath();
+      cont.pts.forEach(([lon, lat], i) => {
+        const p = project(lat, lon, w, h);
+        i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
+      });
+      ctx.closePath();
       ctx.stroke();
     }
   }
