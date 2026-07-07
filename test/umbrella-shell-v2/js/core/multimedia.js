@@ -4,7 +4,7 @@ const UmbrellaMainframe = {
     init() {
         this.initSystem();
         this.initCamera();
-        this.initGlobe();
+        // Globe remplacé par worldmap.js (UmbrellaWorldMap)
         this.registerCommands();
         window.addEventListener('resize', () => this.resizeCanvas());
     },
@@ -129,72 +129,16 @@ const UmbrellaMainframe = {
         }
     },
 
-    // --- GLOBE SATELLITE VECTORIEL ---
-    initGlobe() {
-        this.mapCanvas = document.getElementById('map-canvas');
-        if (!this.mapCanvas) return;
-        this.mapCtx = this.mapCanvas.getContext('2d');
-        this.rot = 0;
-        this.animateGlobe();
-    },
-
-    animateGlobe() {
-        if (!this.mapCtx) return;
-        const ctx = this.mapCtx;
-        const w = this.mapCanvas.width;
-        const h = this.mapCanvas.height;
-        const cx = w / 2;
-        const cy = h / 2;
-        const radius = Math.min(w, h) * 0.38;
-
-        ctx.fillStyle = '#050505';
-        ctx.fillRect(0, 0, w, h);
-
-        this.rot += 0.004;
-
-        // Sphère
-        ctx.strokeStyle = 'rgba(255, 51, 51, 0.25)';
-        ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI*2); ctx.stroke();
-
-        // Méridiens
-        ctx.strokeStyle = 'rgba(255, 51, 51, 0.1)';
-        for (let i = 0; i < Math.PI; i += Math.PI / 6) {
-            let offset = i + this.rot;
-            if (Math.cos(offset) >= 0) {
-                ctx.beginPath();
-                ctx.ellipse(cx, cy, Math.abs(Math.sin(offset)*radius), radius, 0, 0, Math.PI*2);
-                ctx.stroke();
-            }
-        }
-        // Parallèles
-        for (let l = -Math.PI/3; l <= Math.PI/3; l += Math.PI/6) {
-            let rLat = Math.cos(l) * radius;
-            let yLat = cy + Math.sin(l) * radius;
-            ctx.beginPath(); ctx.ellipse(cx, yLat, rLat, rLat*0.15, 0, 0, Math.PI*2); ctx.stroke();
-        }
-
-        // Cible Clignotante (Coordonnées Satellite)
-        let pulse = Math.sin(Date.now() * 0.006) * 4 + 8;
-        ctx.strokeStyle = '#ff3333';
-        ctx.beginPath(); ctx.arc(cx + 20, cy + 25, pulse, 0, Math.PI*2); ctx.stroke();
-        ctx.fillStyle = '#ff3333';
-        ctx.beginPath(); ctx.arc(cx + 20, cy + 25, 2, 0, Math.PI*2); ctx.fill();
-
-        ctx.font = '9px monospace';
-        ctx.fillText("SAT_LOCK: ACTIVE", cx - 40, cy + radius + 20);
-        
-        requestAnimationFrame(() => this.animateGlobe());
-    },
+    // Globe remplacé par worldmap.js — plus de rendu ici
+    initGlobe() {},
+    animateGlobe() {},
 
     resizeCanvas() {
         if (this.camCanvas) {
             this.camCanvas.width = this.camCanvas.parentElement.clientWidth;
             this.camCanvas.height = this.camCanvas.parentElement.clientHeight;
         }
-        if (this.mapCanvas) {
-            this.mapCanvas.width = this.mapCanvas.parentElement.clientWidth;
-            this.mapCanvas.height = this.mapCanvas.parentElement.clientHeight;
-        }
+        // map-canvas géré par worldmap.js
     },
 
     // --- ENREGISTREMENT DES COMMANDES DANS LE TERMINAL ---

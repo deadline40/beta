@@ -7,7 +7,10 @@
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/theme-umbrella.css">
     <link rel="stylesheet" href="css/terminal.css">
-    <link rel="stylesheet" href="css/windows.css"></head>
+    <link rel="stylesheet" href="css/windows.css">
+    <link rel="stylesheet" href="css/worldmap.css">
+    <link rel="stylesheet" href="css/apps.css">
+</head>
 <body>
     <div id="bg-grid"></div>
     <div id="scanline"></div>
@@ -45,6 +48,23 @@
                 </div>
             </section>
             
+            <!-- ═══════ PANNEAU GEOSPATIAL TRACKING ═══════ -->
+            <section class="panel" id="geo-tracking-panel" style="flex:2; min-height:0;">
+                <h2 class="panel-title">🌍 GEOSPATIAL TRACKING</h2>
+                <div class="panel-content">
+                    <!-- Résumé stats -->
+                    <div id="geo-track-summary"></div>
+
+                    <!-- Mobiles -->
+                    <div class="geo-section-label">▶ MOBILES EN TRANSIT</div>
+                    <div id="geo-mobiles-list"></div>
+
+                    <!-- Cibles fixes -->
+                    <div class="geo-section-label">▶ NODES / CIBLES ACTIVES</div>
+                    <div id="geo-track-list"></div>
+                </div>
+            </section>
+
             <section class="panel" id="user-info">
                 <h2 class="panel-title">OPERATOR PROFILE</h2>
                 <div class="panel-content">
@@ -130,6 +150,7 @@
     <script src="js/apps/allessa.js"></script>
 
     <script src="js/core/multimedia.js"></script>
+    <script src="js/core/worldmap.js"></script>
     <script src="js/core/appsManager.js"></script>
     <script src="js/main.js"></script>
 </body>

@@ -1,0 +1,206 @@
+/* ============================================================
+   css/worldmap.css — Panneau de tracking géospatial (sidebar gauche)
+   Umbrella Corp Mainframe OS
+   ============================================================ */
+
+/* ── PANNEAU PRINCIPAL SIDEBAR ── */
+#geo-tracking-panel .panel-content {
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* ── RÉSUMÉ STATISTIQUES ── */
+#geo-track-summary {
+    padding: 8px 10px 6px;
+    border-bottom: 1px solid #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    background: #060606;
+    flex-shrink: 0;
+}
+
+.geo-stat {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    color: #555;
+    letter-spacing: 0.5px;
+}
+
+.geo-stat-val {
+    font-weight: bold;
+    font-size: 10px;
+}
+
+/* ── DIVIDER TITRE ── */
+.geo-section-label {
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    color: #333;
+    padding: 4px 10px;
+    background: #080808;
+    border-bottom: 1px solid #111;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+/* ── LISTE DES CIBLES ── */
+#geo-track-list {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #1a1a1a #050505;
+}
+
+#geo-track-list::-webkit-scrollbar { width: 4px; }
+#geo-track-list::-webkit-scrollbar-track { background: #050505; }
+#geo-track-list::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 2px; }
+#geo-track-list::-webkit-scrollbar-thumb:hover { background: #ff3333; }
+
+.track-item {
+    padding: 6px 10px 5px;
+    border-bottom: 1px solid #0f0f0f;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    border-left: 2px solid #111;
+}
+
+.track-item:hover {
+    background: rgba(255, 51, 51, 0.05);
+}
+
+.track-item--selected {
+    background: rgba(255, 51, 51, 0.08);
+}
+
+.track-item-header {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 2px;
+}
+
+.track-dot {
+    font-size: 8px;
+    animation: trackPulse 2s ease-in-out infinite;
+}
+
+@keyframes trackPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.track-id {
+    font-size: 9px;
+    color: #777;
+    letter-spacing: 1px;
+    flex: 1;
+}
+
+.track-badge {
+    font-size: 7px;
+    border: 1px solid;
+    padding: 1px 3px;
+    letter-spacing: 0.5px;
+    font-weight: bold;
+    opacity: 0.85;
+}
+
+.track-live {
+    font-size: 7px;
+    color: #00ff88;
+    background: rgba(0,255,136,0.1);
+    padding: 1px 3px;
+    animation: trackPulse 1.5s infinite;
+}
+
+.track-offline {
+    font-size: 7px;
+    color: #333;
+    padding: 1px 3px;
+}
+
+.track-name {
+    font-size: 10px;
+    color: #bbb;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.track-coords {
+    display: flex;
+    gap: 6px;
+    font-size: 7px;
+    color: #444;
+}
+
+.track-type {
+    margin-left: auto;
+    color: #333;
+    border: 1px solid #1a1a1a;
+    padding: 0 3px;
+}
+
+/* ── MOBILES EN TRANSIT ── */
+#geo-mobiles-list {
+    padding: 4px 10px;
+    background: #040404;
+    border-top: 1px solid #111;
+    flex-shrink: 0;
+}
+
+.mobile-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 8px;
+    padding: 2px 0;
+    border-bottom: 1px solid #0a0a0a;
+}
+
+.mobile-name {
+    font-weight: bold;
+    color: #888;
+    letter-spacing: 0.5px;
+    flex: 1;
+}
+
+.mobile-speed {
+    color: #555;
+    font-size: 7px;
+}
+
+.mobile-pos {
+    color: #333;
+    font-size: 7px;
+    text-align: right;
+}
+
+/* ── CARTE (canvas) AMÉLIORÉE ── */
+#world-map .panel-content {
+    padding: 0;
+    position: relative;
+    flex: 1;
+}
+
+#map-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+}
+
+/* ── FLASH D'ALERTE SUR SÉLECTION ── */
+.track-item--selected .track-name {
+    animation: selFlash 0.3s ease;
+}
+
+@keyframes selFlash {
+    from { color: #ffffff; }
+    to   { color: #bbb; }
+}
