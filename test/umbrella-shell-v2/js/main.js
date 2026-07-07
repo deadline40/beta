@@ -81,8 +81,100 @@
     setInterval(tick, 1000);
   }
 
+  const ArticleReport = (() => {
+    const articles = [
+      {
+        id: 'R-001',
+        title: 'Protocole d’implantation bionique — phase 3',
+        summary: 'Analyse tactique des derniers retours de terrain, incidents de surcharge et recommandations pour le recalibrage neural.',
+        author: 'Dr. A. K. Mercer',
+        date: '07.07.2026',
+        classification: 'LEVEL 4',
+        body: [
+          'Le projet de renforcement bionique a produit plusieurs retours de stress maître sur les unités augmentées. Les capteurs périphériques enregistrent des impulsions incohérentes au niveau des interfaces synaptiques.',
+          'Une station d’interruption a été déployée pour contenir les véhicules autonomes affectés. La suite de la mission consiste à vérifier l’intégrité du couplage RP-9 entre le cortex artificiel et les modules de locomotion.',
+          'Il est recommandé de limiter l’accès des opérateurs non autorisés aux données de calibration et de renforcer la couche cryptographique des sauvegardes de mémoire volatile.'
+        ],
+        image: 'https://picsum.photos/seed/bioreport/420/240',
+        video: 'assets/videos/1105533363-preview.mp4',
+        audio: 'https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3'
+      },
+      {
+        id: 'R-002',
+        title: 'Incident de confinement — module S-12',
+        summary: 'Rapport de l’évasion sensorielle dans le module de stockage des tissus et des implants expérimentaux.',
+        author: 'Lt. C. R. Nguyen',
+        date: '08.07.2026',
+        classification: 'LEVEL 3',
+        body: [
+          'Le module S-12 a subi une brèche de sécurité suite à un court-circuit interne. Les systèmes de surveillance ont capté une signature biométrique altérée au moment de l’incident.',
+          'La procédure d’isolement a été exécutée en 42 secondes. Aucun opérateur n’a été blessé, mais un flux électromagnétique anormal a perturbé le réseau local.',
+          'Les données de l’archive montrent une tentative d’accès non autorisé aux profils augmentés stockés sur le serveur central.'
+        ],
+        image: 'https://picsum.photos/seed/confinement/420/240',
+        video: 'assets/videos/3510927063-preview.mp4',
+        audio: 'https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3'
+      }
+    ];
+
+    let currentIndex = 0;
+
+    function renderArticle(index) {
+      const article = articles[index] || articles[0];
+      const titleEl = document.getElementById('article-title');
+      const summaryEl = document.getElementById('article-summary');
+      const authorEl = document.getElementById('article-author');
+      const dateEl = document.getElementById('article-date');
+      const classificationEl = document.getElementById('article-classification');
+      const bodyEl = document.getElementById('article-body');
+      const imageEl = document.getElementById('article-image');
+      const videoEl = document.getElementById('article-video');
+      const audioEl = document.getElementById('article-audio');
+
+      if (titleEl) titleEl.textContent = article.title;
+      if (summaryEl) summaryEl.textContent = article.summary;
+      if (authorEl) authorEl.textContent = article.author;
+      if (dateEl) dateEl.textContent = article.date;
+      if (classificationEl) classificationEl.textContent = article.classification;
+
+      if (bodyEl) {
+        bodyEl.innerHTML = '';
+        article.body.forEach(paragraph => {
+          const p = document.createElement('p');
+          p.textContent = paragraph;
+          bodyEl.appendChild(p);
+        });
+      }
+      if (imageEl) imageEl.src = article.image;
+      if (videoEl) videoEl.src = article.video;
+      if (audioEl) audioEl.src = article.audio;
+
+      const navEl = document.getElementById('article-nav');
+      if (navEl) {
+        navEl.innerHTML = '';
+        articles.forEach((item, idx) => {
+          const btn = document.createElement('button');
+          btn.textContent = item.id;
+          btn.className = idx === currentIndex ? 'active' : '';
+          btn.addEventListener('click', () => {
+            currentIndex = idx;
+            renderArticle(idx);
+          });
+          navEl.appendChild(btn);
+        });
+      }
+    }
+
+    function init() {
+      renderArticle(currentIndex);
+    }
+
+    return { init };
+  })();
+
   document.addEventListener('DOMContentLoaded', () => {
     boot();
     initClock();
+    ArticleReport.init();
   });
 })();
