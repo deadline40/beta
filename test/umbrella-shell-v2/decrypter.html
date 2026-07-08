@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UMBRELLA // FILE DECRYPTER</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap');
+
+:root {
+  --red: #ff3333; --red-dk: #200606;
+  --amber: #ffaa00; --ok: #00ff00;
+  --cyan: #00ffff;
+  --bone: #d8d2c4; --bg: #020202;
+  --panel-bg: rgba(10,10,10,0.94);
+  --panel-edge: #333333; --text-dim: #808080;
+  --font-display: 'Orbitron', sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--bone); font-family: var(--font-mono); min-height: 100vh; overflow: hidden; }
+
+#bg-grid { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: linear-gradient(rgba(255,51,51,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,51,51,0.045) 1px, transparent 1px); background-size: 34px 34px; mask-image: radial-gradient(ellipse at center, black 40%, transparent 90%); }
+#scanline { position: fixed; left: 0; right: 0; height: 140px; z-index: 1; pointer-events: none; background: linear-gradient(to bottom, transparent, rgba(255,51,51,0.05), transparent); animation: sweep 8s linear infinite; }
+@keyframes sweep { 0% { top: -140px; } 100% { top: 100vh; } }
+#vignette { position: fixed; inset: 0; z-index: 5; pointer-events: none; box-shadow: inset 0 0 220px rgba(0,0,0,0.85); }
+
+.container { position: relative; z-index: 2; width: 100%; height: 100vh; display: flex; flex-direction: column; }
+
+header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--red); padding: 12px 20px; background: linear-gradient(90deg, rgba(255,51,51,0.1), transparent); }
+.brand { font-family: var(--font-display); font-weight: 900; font-size: 0.9rem; letter-spacing: 4px; color: var(--red); text-shadow: 0 0 12px rgba(255,51,51,0.55); }
+.brand span { color: var(--cyan); }
+.timestamp { font-size: 0.65rem; color: var(--text-dim); letter-spacing: 1px; }
+
+.main-content { display: flex; flex: 1; gap: 12px; padding: 12px; overflow: hidden; }
+
+.left-panel { flex: 0 0 35%; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
+.right-panel { flex: 1; display: flex; flex-direction: column; }
+
+.panel { background: var(--panel-bg); border: 1px solid var(--red); clip-path: polygon(0 8px, 8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%); overflow: hidden; display: flex; flex-direction: column; }
+.panel-title { background: linear-gradient(90deg, var(--red-dk), transparent); border-bottom: 1px solid var(--panel-edge); padding: 8px 12px; font-family: var(--font-display); font-size: 0.65rem; letter-spacing: 2px; color: var(--red); }
+.panel-body { padding: 12px; overflow-y: auto; flex: 1; }
+
+.file-item { background: rgba(0,255,0,0.03); border: 1px solid var(--panel-edge); padding: 8px; margin-bottom: 6px; clip-path: polygon(0 4px, 4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%); cursor: pointer; transition: all 0.2s; }
+.file-item:hover { border-color: var(--ok); background: rgba(0,255,0,0.08); box-shadow: 0 0 10px rgba(0,255,0,0.2); }
+.file-item.selected { border-color: var(--ok); background: rgba(0,255,0,0.15); box-shadow: 0 0 15px rgba(0,255,0,0.4); }
+.file-icon { display: inline-block; margin-right: 8px; color: var(--cyan); font-size: 0.9rem; }
+.file-name { font-size: 0.70rem; color: var(--bone); font-weight: bold; }
+.file-size { font-size: 0.55rem; color: var(--text-dim); display: block; margin-top: 2px; }
+
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat-box { background: rgba(0,255,0,0.05); border: 1px solid var(--panel-edge); padding: 8px; text-align: center; }
+.stat-label { font-size: 0.55rem; color: var(--text-dim); letter-spacing: 1px; }
+.stat-value { font-size: 0.85rem; color: var(--ok); font-family: var(--font-display); font-weight: bold; margin-top: 4px; }
+
+/* TERMINAL */
+#terminal { background: #000; border: 1px solid var(--red); display: flex; flex-direction: column; overflow: hidden; }
+#terminal-output { flex: 1; overflow-y: auto; padding: 12px; font-size: 0.70rem; line-height: 1.5; }
+#terminal-line { display: flex; align-items: center; padding: 0 12px 12px; border-top: 1px solid var(--panel-edge); }
+#terminal-prompt { color: var(--ok); font-weight: bold; margin-right: 8px; white-space: nowrap; }
+#terminal-input { background: transparent; border: none; color: var(--ok); flex: 1; font-family: var(--font-mono); font-size: 0.70rem; outline: none; }
+#terminal-input::selection { background: var(--ok); color: #000; }
+
+.output-line { margin-bottom: 4px; }
+.output-prompt { color: var(--ok); font-weight: bold; }
+.output-success { color: var(--ok); }
+.output-warning { color: var(--amber); }
+.output-error { color: var(--red); }
+.output-info { color: var(--cyan); }
+
+.progress-bar { width: 100%; height: 16px; background: rgba(0,0,0,0.5); border: 1px solid var(--ok); margin: 8px 0; position: relative; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--ok), var(--cyan)); width: 0%; transition: width 0.1s linear; box-shadow: 0 0 10px var(--ok); }
+.progress-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: bold; color: #000; z-index: 1; }
+
+.action-buttons { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--panel-edge); }
+.btn { flex: 1; background: rgba(0,255,0,0.1); border: 1px solid var(--ok); color: var(--ok); padding: 8px; font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 1px; cursor: pointer; transition: all 0.2s; }
+.btn:hover { background: rgba(0,255,0,0.2); box-shadow: 0 0 10px rgba(0,255,0,0.3); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn.danger { background: rgba(255,51,51,0.1); border-color: var(--red); color: var(--red); }
+.btn.danger:hover { background: rgba(255,51,51,0.2); box-shadow: 0 0 10px rgba(255,51,51,0.3); }
+
+/* HACKER ANIMATION */
+.hacker-matrix { position: absolute; top: 0; right: 0; width: 200px; height: 150px; opacity: 0.1; font-size: 0.5rem; color: var(--ok); overflow: hidden; pointer-events: none; font-family: var(--font-mono); line-height: 1; }
+.matrix-char { position: absolute; animation: fall linear infinite; }
+@keyframes fall { 0% { top: -20px; opacity: 1; } 90% { opacity: 1; } 100% { top: 150px; opacity: 0; } }
+
+.scan-line { position: absolute; width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--ok), transparent); animation: scan 3s linear infinite; pointer-events: none; }
+@keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.5); }
+::-webkit-scrollbar-thumb { background: var(--ok); }
+::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
+</style>
+</head>
+<body>
+
+<div id="bg-grid"></div>
+<div id="scanline"></div>
+<div id="vignette"></div>
+
+<div class="container">
+  <header>
+    <div>
+      <div class="brand">UMBRELLA<span>::</span>DECRYPTER
+        <div style="font-size:0.55rem; letter-spacing:1px; color:var(--text-dim); margin-top:4px;">FICHIER SYSTEMS — CRYPTAGE MILITAIRE RSA-2048</div>
+      </div>
+    </div>
+    <div class="timestamp" id="timestamp">--:--:--</div>
+  </header>
+
+  <div class="main-content">
+    <!-- LEFT PANEL: FILES -->
+    <div class="left-panel">
+      <div class="panel">
+        <div class="panel-title">🔒 FICHIERS CRYPTES</div>
+        <div class="panel-body" id="file-list"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">📊 STATISTIQUES</div>
+        <div class="panel-body">
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="stat-label">FICHIERS</div>
+              <div class="stat-value" id="stat-files">0</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">TAILLE TOTAL</div>
+              <div class="stat-value" id="stat-size">0MB</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">DECHIFFRES</div>
+              <div class="stat-value" id="stat-decrypted">0</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">TEMPS</div>
+              <div class="stat-value" id="stat-time">--</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: TERMINAL -->
+    <div class="right-panel">
+      <div class="panel" style="flex:1;">
+        <div class="panel-title">⚡ TERMINAL DE DECHIFFREMENT</div>
+        <div id="terminal">
+          <div id="terminal-output"></div>
+          <div id="terminal-line">
+            <span id="terminal-prompt">ROOT@DECRYPT></span>
+            <input type="text" id="terminal-input" placeholder="" autofocus autocomplete="off">
+          </div>
+        </div>
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="panel" style="flex:0 0 60px;">
+        <div class="panel-title">🔐 PROGRESSION DECHIFFREMENT</div>
+        <div class="panel-body" style="padding:12px; display:flex; flex-direction:column; gap:8px;">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+            <div class="progress-text" id="progress-text">0%</div>
+          </div>
+          <div style="font-size:0.60rem; color:var(--text-dim);">
+            <span id="progress-file">PRET</span> — <span id="progress-speed">0 KB/s</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BUTTONS -->
+      <div class="action-buttons">
+        <button class="btn" id="btn-decrypt">▶ DECHIFFRER</button>
+        <button class="btn danger" id="btn-reset">⊗ REINITIALISER</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const FILES = [
+  { id: 1, name: 'security_access.enc', size: 2.4, encrypted: true },
+  { id: 2, name: 'personnel_data.enc', size: 5.8, encrypted: true },
+  { id: 3, name: 'virus_samples.enc', size: 12.3, encrypted: true },
+  { id: 4, name: 'facility_map.enc', size: 1.5, encrypted: true },
+  { id: 5, name: 'admin_codes.enc', size: 0.8, encrypted: true },
+  { id: 6, name: 'research_notes.enc', size: 8.2, encrypted: true },
+];
+
+const terminalOutput = document.getElementById('terminal-output');
+const fileList = document.getElementById('file-list');
+const progressFill = document.getElementById('progress-fill');
+const progressText = document.getElementById('progress-text');
+const progressFile = document.getElementById('progress-file');
+const progressSpeed = document.getElementById('progress-speed');
+const statFiles = document.getElementById('stat-files');
+const statSize = document.getElementById('stat-size');
+const statDecrypted = document.getElementById('stat-decrypted');
+const statTime = document.getElementById('stat-time');
+const btnDecrypt = document.getElementById('btn-decrypt');
+const btnReset = document.getElementById('btn-reset');
+const terminalInput = document.getElementById('terminal-input');
+const timestamp = document.getElementById('timestamp');
+
+let selectedFile = null;
+let isDecrypting = false;
+let decryptedCount = 0;
+let startTime = null;
+
+function tickTimestamp() { timestamp.textContent = new Date().toTimeString().split(' ')[0]; }
+setInterval(tickTimestamp, 1000); tickTimestamp();
+
+function printLine(text, className = 'output-info') {
+  const line = document.createElement('div');
+  line.className = `output-line ${className}`;
+  line.innerHTML = text;
+  terminalOutput.appendChild(line);
+  terminalOutput.scrollTop = terminalOutput.scrollHeight;
+}
+
+function initTerminal() {
+  terminalOutput.innerHTML = '';
+  printLine('<span class="output-info">UMBRELLA SYSTEMS — FILE DECRYPTION SUITE v3.2</span>');
+  printLine('<span class="output-info">© 2026 UMBRELLA CORPORATION</span>');
+  printLine('');
+  printLine('<span class="output-prompt">ROOT@DECRYPT></span> <span class="output-success">init</span>', 'output-success');
+  printLine('Initializing decryption engine...', 'output-info');
+  printLine('RSA-2048 module: OK', 'output-success');
+  printLine('AES-256 module: OK', 'output-success');
+  printLine('Hash verification: OK', 'output-success');
+  printLine('');
+  printLine('System ready for decryption operations.', 'output-success');
+  printLine('');
+}
+
+function renderFileList() {
+  fileList.innerHTML = '';
+  FILES.forEach(f => {
+    const item = document.createElement('div');
+    item.className = `file-item ${selectedFile?.id === f.id ? 'selected' : ''}`;
+    item.innerHTML = `
+      <div class="file-name"><span class="file-icon">🔐</span>${f.name}</div>
+      <div class="file-size">${f.size} MB — ${f.encrypted ? '🔒 CRYPTE' : '🔓 OK'}</div>
+    `;
+    item.addEventListener('click', () => {
+      selectedFile = f;
+      renderFileList();
+      printLine(`<span class="output-prompt">ROOT@DECRYPT></span> <span class="output-success">select ${f.name}</span>`, '');
+      printLine(`File selected: ${f.name} (${f.size} MB)`, 'output-success');
+    });
+    fileList.appendChild(item);
+  });
+  updateStats();
+}
+
+function updateStats() {
+  statFiles.textContent = FILES.length;
+  const totalSize = FILES.reduce((a, b) => a + b.size, 0);
+  statSize.textContent = totalSize.toFixed(1) + 'MB';
+  statDecrypted.textContent = decryptedCount;
+  if (startTime) {
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    statTime.textContent = elapsed + 's';
+  }
+}
+
+function decrypt() {
+  if (!selectedFile || isDecrypting) return;
+  
+  isDecrypting = true;
+  btnDecrypt.disabled = true;
+  startTime = Date.now();
+  
+  printLine('');
+  printLine(`<span class="output-prompt">ROOT@DECRYPT></span> <span class="output-success">decrypt --force ${selectedFile.name}</span>`, '');
+  printLine('');
+  printLine('Analyzing file structure...', 'output-info');
+  
+  setTimeout(() => {
+    printLine('RSA key extraction: PROCESSING...', 'output-warning');
+    progressFile.textContent = `Analyzing: ${selectedFile.name}`;
+  }, 300);
+
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress += Math.random() * 15;
+    if (progress > 100) progress = 100;
+    
+    progressFill.style.width = progress + '%';
+    progressText.textContent = Math.floor(progress) + '%';
+    const speed = (Math.random() * 200 + 50).toFixed(0);
+    progressSpeed.textContent = speed + ' KB/s';
+
+    if (progress >= 100) {
+      clearInterval(interval);
+      progressFill.style.width = '100%';
+      progressText.textContent = '100%';
+      progressFile.textContent = 'DECHIFFREMENT TERMINE';
+      
+      setTimeout(() => {
+        printLine('RSA key extraction: OK', 'output-success');
+        printLine('AES decryption: PROCESSING...', 'output-warning');
+      }, 200);
+
+      setTimeout(() => {
+        printLine('AES decryption: OK', 'output-success');
+        printLine('Hash verification: OK', 'output-success');
+        printLine('File integrity: VERIFIED', 'output-success');
+        printLine('');
+        printLine(`✓ ${selectedFile.name} successfully decrypted!`, 'output-success');
+        printLine(`Output: ${selectedFile.name.replace('.enc', '')}`, 'output-success');
+        printLine('');
+        
+        selectedFile.encrypted = false;
+        decryptedCount++;
+        updateStats();
+        renderFileList();
+        
+        setTimeout(() => {
+          isDecrypting = false;
+          btnDecrypt.disabled = false;
+          progressFile.textContent = 'PRET';
+          progressFill.style.width = '0%';
+          progressText.textContent = '0%';
+        }, 800);
+      }, 600);
+    }
+  }, 80);
+}
+
+function reset() {
+  selectedFile = null;
+  isDecrypting = false;
+  decryptedCount = 0;
+  startTime = null;
+  progressFill.style.width = '0%';
+  progressText.textContent = '0%';
+  progressFile.textContent = 'PRET';
+  progressSpeed.textContent = '0 KB/s';
+  FILES.forEach(f => f.encrypted = true);
+  
+  initTerminal();
+  renderFileList();
+  
+  printLine('');
+  printLine('<span class="output-prompt">ROOT@DECRYPT></span> <span class="output-success">reset</span>', '');
+  printLine('System reset complete.', 'output-success');
+}
+
+terminalInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const cmd = terminalInput.value.trim();
+    terminalInput.value = '';
+    
+    if (!cmd) return;
+    
+    printLine(`<span class="output-prompt">ROOT@DECRYPT></span> <span class="output-success">${cmd}</span>`, '');
+    
+    if (cmd === 'decrypt' || cmd.startsWith('decrypt ')) {
+      decrypt();
+    } else if (cmd === 'reset') {
+      reset();
+    } else if (cmd === 'help') {
+      printLine('Available commands:', 'output-info');
+      printLine('  decrypt          — decrypt selected file', 'output-info');
+      printLine('  reset            — reset all operations', 'output-info');
+      printLine('  clear            — clear terminal', 'output-info');
+      printLine('  help             — show this help', 'output-info');
+    } else if (cmd === 'clear') {
+      terminalOutput.innerHTML = '';
+    } else {
+      printLine(`Command not found: ${cmd}`, 'output-error');
+      printLine('Type "help" for available commands', 'output-info');
+    }
+  }
+});
+
+btnDecrypt.addEventListener('click', decrypt);
+btnReset.addEventListener('click', reset);
+
+// Initialize
+initTerminal();
+renderFileList();
+
+// Matrix animation background
+const hackerMatrix = document.createElement('div');
+hackerMatrix.className = 'hacker-matrix';
+document.body.appendChild(hackerMatrix);
+
+const chars = '01アイウエオカキクケコサシスセソタチツテト';
+for (let i = 0; i < 20; i++) {
+  const char = document.createElement('div');
+  char.className = 'matrix-char';
+  char.textContent = chars[Math.floor(Math.random() * chars.length)];
+  char.style.left = Math.random() * 200 + 'px';
+  char.style.animationDuration = (Math.random() * 3 + 2) + 's';
+  char.style.animationDelay = Math.random() * 2 + 's';
+  hackerMatrix.appendChild(char);
+}
+</script>
+</body>
+</html>

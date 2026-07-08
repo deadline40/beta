@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UMBRELLA // RAPPORTS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap');
+
+:root {
+  --red: #ff3333; --red-dk: #200606;
+  --amber: #ffaa00; --ok: #00ff00;
+  --bone: #d8d2c4; --bg: #020202;
+  --panel-bg: rgba(10,10,10,0.94);
+  --panel-edge: #333333; --text-dim: #808080;
+  --font-display: 'Orbitron', sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--bone);
+  font-family: var(--font-mono); min-height: 100vh; overflow-x: hidden;
+}
+#bg-grid {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,51,51,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,51,51,0.045) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 90%);
+}
+#scanline {
+  position: fixed; left: 0; right: 0; height: 140px; z-index: 1; pointer-events: none;
+  background: linear-gradient(to bottom, transparent, rgba(255,51,51,0.05), transparent);
+  animation: sweep 8s linear infinite;
+}
+@keyframes sweep { 0% { top: -140px; } 100% { top: 100vh; } }
+#vignette { position: fixed; inset: 0; z-index: 5; pointer-events: none; box-shadow: inset 0 0 220px rgba(0,0,0,0.85); }
+
+.wrap { position: relative; z-index: 2; max-width: 1100px; margin: 0 auto; padding: 32px 20px 80px; }
+
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 2px solid var(--red); padding-bottom: 16px; margin-bottom: 24px;
+  flex-wrap: wrap; gap: 12px;
+}
+.brand { font-family: var(--font-display); font-weight: 900; font-size: 1.3rem; letter-spacing: 4px; color: var(--red); text-shadow: 0 0 12px rgba(255,51,51,0.55); }
+.brand span { color: var(--amber); }
+.brand small { display: block; font-family: var(--font-mono); font-weight: 400; font-size: 0.62rem; letter-spacing: 2px; color: var(--text-dim); margin-top: 4px; }
+.clearance { text-align: right; font-size: 0.68rem; color: var(--text-dim); letter-spacing: 1px; }
+.clearance b { color: var(--red); }
+.dot { display:inline-block; width:6px; height:6px; border-radius:50%; background: var(--ok); margin-right:5px; box-shadow: 0 0 6px var(--ok); animation: blink 1.6s infinite; }
+@keyframes blink { 50% { opacity: 0.25; } }
+
+.toolbar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+.toolbar input { flex: 1; min-width: 180px; background: rgba(255,255,255,0.02); border: 1px solid var(--panel-edge); color: var(--bone); padding: 8px 10px; font-family: var(--font-mono); font-size: 0.75rem; outline: none; }
+.toolbar input:focus { border-color: var(--red); }
+.tag-btn { border: 1px solid var(--panel-edge); background: rgba(255,51,51,0.03); color: var(--text-dim); font-size: 0.6rem; letter-spacing: 1px; padding: 8px 12px; cursor: pointer; font-family: var(--font-mono); }
+.tag-btn:hover { border-color: var(--red); color: var(--red); }
+.tag-btn.active { border-color: var(--red); color: var(--red); background: rgba(255,51,51,0.1); }
+.new-btn { border: 1px solid var(--ok); color: var(--ok); background: rgba(0,255,0,0.05); font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 1px; padding: 8px 14px; cursor: pointer; }
+.new-btn:hover { background: rgba(0,255,0,0.15); }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+
+.card { background: var(--panel-bg); border: 1px solid var(--panel-edge); clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%); display: flex; flex-direction: column; overflow: hidden; transition: border-color .2s, box-shadow .2s; }
+.card:hover { border-color: var(--red); box-shadow: 0 0 22px rgba(255,51,51,0.12); }
+.card-thumb { height: 130px; background: #0a0a0a center/cover no-repeat; display: flex; align-items: center; justify-content: center; color: var(--panel-edge); font-size: 2rem; border-bottom: 1px solid var(--panel-edge); }
+.card-body { padding: 12px 14px; flex: 1; display: flex; flex-direction: column; }
+.card-tag { align-self: flex-start; font-size: 0.55rem; letter-spacing: 1px; padding: 2px 7px; border: 1px solid currentColor; margin-bottom: 6px; }
+.card-tag.PUBLIC { color: var(--ok); }
+.card-tag.INTERNE { color: var(--amber); }
+.card-tag.CONFIDENTIEL { color: #ff8800; }
+.card-tag.URGENT { color: var(--red); animation: blink 1s infinite; }
+.card-title { font-family: var(--font-display); font-size: 0.9rem; color: var(--bone); margin-bottom: 6px; letter-spacing: .5px; }
+.card-meta { font-size: 0.62rem; color: var(--text-dim); margin-bottom: 8px; }
+.card-meta b { color: var(--bone); font-weight: normal; }
+.card-media-icons { font-size: 0.72rem; color: var(--text-dim); margin-bottom: 10px; letter-spacing: 3px; }
+.card-actions { margin-top: auto; display: flex; gap: 6px; padding-top: 10px; border-top: 1px dashed var(--panel-edge); }
+.mini-btn { flex: 1; background: none; border: 1px solid var(--panel-edge); color: var(--text-dim); font-family: var(--font-mono); font-size: 0.58rem; letter-spacing: 1px; padding: 6px 4px; cursor: pointer; }
+.mini-btn:hover { border-color: var(--red); color: var(--red); }
+.mini-btn.danger:hover { border-color: #ff2222; color: #ff2222; }
+
+.empty { color: #555; font-size: 0.75rem; grid-column: 1/-1; text-align: center; padding: 40px 0; }
+
+footer { margin-top: 40px; text-align: center; font-size: 0.6rem; color: var(--text-dim); letter-spacing: 1px; }
+
+/* ============================================================
+   DRAGGABLE POPUP WINDOWS (report detail / create / edit)
+   ============================================================ */
+#desktop-layer { position: fixed; inset: 0; z-index: 900; pointer-events: none; }
+
+.pop-win {
+  position: absolute;
+  width: 480px;
+  max-width: calc(100vw - 32px);
+  max-height: 82vh;
+  background: var(--panel-bg);
+  border: 1px solid var(--red);
+  clip-path: polygon(0 14px, 14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+  box-shadow: 0 12px 50px rgba(0,0,0,0.75), 0 0 25px rgba(255,51,51,0.12);
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.pop-win-titlebar {
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 12px;
+  background: linear-gradient(90deg, var(--red-dk), transparent);
+  border-bottom: 1px solid var(--panel-edge);
+  font-family: var(--font-display); font-size: 0.6rem; letter-spacing: 2px; color: var(--red);
+  cursor: move; user-select: none;
+}
+.pop-win-close { cursor: pointer; color: var(--text-dim); padding: 0 4px; }
+.pop-win-close:hover { color: var(--red); }
+.pop-win-body { padding: 18px; overflow-y: auto; }
+.pop-win-resize { position: absolute; right: 0; bottom: 0; width: 16px; height: 16px; cursor: nwse-resize; background: linear-gradient(135deg, transparent 50%, var(--panel-edge) 50%); }
+
+/* detail view (rendered inside a pop-win-body) */
+.author-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.author-avatar { width: 46px; height: 46px; border-radius: 50%; background: var(--red-dk); border: 1px solid var(--red); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); color: var(--red); font-size: 1rem; flex-shrink: 0; }
+.author-name { color: var(--bone); font-size: 0.85rem; }
+.author-role { color: var(--text-dim); font-size: 0.62rem; letter-spacing: 1px; }
+.detail-date { font-size: 0.6rem; color: var(--text-dim); margin-left: auto; text-align: right; }
+.detail-title { font-family: var(--font-display); font-size: 1.05rem; color: var(--red); margin-bottom: 6px; letter-spacing: 1px; text-shadow: 0 0 8px rgba(255,51,51,.4); }
+.detail-text { font-size: 0.78rem; line-height: 1.7; color: var(--bone); margin-bottom: 16px; white-space: pre-wrap; }
+.detail-media { margin-bottom: 14px; }
+.detail-media img, .detail-media video { width: 100%; display: block; border: 1px solid var(--panel-edge); }
+.detail-media audio { width: 100%; }
+.detail-media .cap { font-size: 0.58rem; color: var(--text-dim); letter-spacing: 1px; margin: 4px 0 12px; }
+
+/* form (rendered inside a pop-win-body) */
+.f-row { display: flex; gap: 10px; margin-bottom: 10px; }
+.f-row > div { flex: 1; }
+label { display: block; font-size: 0.6rem; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 4px; }
+input[type=text], input[type=date], select, textarea {
+  width: 100%; background: rgba(255,255,255,0.02); border: 1px solid var(--panel-edge);
+  color: var(--bone); padding: 8px; font-family: var(--font-mono); font-size: 0.72rem; outline: none;
+}
+input[type=text]:focus, input[type=date]:focus, select:focus, textarea:focus { border-color: var(--red); }
+textarea { resize: vertical; min-height: 80px; }
+.media-field { border: 1px dashed var(--panel-edge); padding: 8px; margin-bottom: 10px; }
+.media-field label.title { color: var(--amber); margin-bottom: 6px; }
+.media-field .sub { display: flex; gap: 8px; align-items: center; }
+.media-field input[type=file] { font-size: 0.62rem; color: var(--text-dim); flex: 1; }
+.hint { font-size: 0.58rem; color: #555; margin-top: 3px; }
+.form-actions { display: flex; gap: 10px; margin-top: 16px; }
+.save-btn { flex: 1; background: rgba(0,255,0,0.08); border: 1px solid var(--ok); color: var(--ok); padding: 10px; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 1px; cursor: pointer; }
+.save-btn:hover { background: rgba(0,255,0,0.18); }
+.cancel-btn { background: none; border: 1px solid var(--panel-edge); color: var(--text-dim); padding: 10px 16px; font-family: var(--font-mono); font-size: 0.7rem; cursor: pointer; }
+.cancel-btn:hover { border-color: var(--red); color: var(--red); }
+</style>
+</head>
+<body>
+
+<div id="bg-grid"></div>
+<div id="scanline"></div>
+<div id="vignette"></div>
+
+<div class="wrap">
+  <header>
+    <div class="brand">UMBRELLA<span>::</span>RAPPORTS
+      <small>ARCHIVES DE RAPPORTS — TEXTE / IMAGE / VIDEO / AUDIO</small>
+    </div>
+    <div class="clearance">
+      <div><span class="dot"></span><b>CONNEXION SECURISEE</b></div>
+      <div>ACCES NIVEAU 5 — <span id="stamp"></span></div>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <input type="text" id="search" placeholder="rechercher un rapport (titre, auteur, contenu)...">
+    <div class="tag-btn active" data-tag="ALL">TOUS</div>
+    <div class="tag-btn" data-tag="PUBLIC">PUBLIC</div>
+    <div class="tag-btn" data-tag="INTERNE">INTERNE</div>
+    <div class="tag-btn" data-tag="CONFIDENTIEL">CONFIDENTIEL</div>
+    <div class="tag-btn" data-tag="URGENT">URGENT</div>
+    <div class="new-btn" id="btn-new">+ NOUVEAU RAPPORT</div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <footer>UMBRELLA CORPORATION © — les rapports sont enregistres localement dans ce navigateur (localStorage)</footer>
+</div>
+
+<!-- floating layer: draggable popup windows spawn here -->
+<div id="desktop-layer"></div>
+
+<script>
+const STORAGE_KEY = 'umbrella_reports_v1';
+
+const SEED = [
+  {
+    id: 'r1', title: 'Incident de confinement — Secteur 7',
+    author: 'Dr. Elena Voss', role: 'Chercheuse en biochimie',
+    date: '2026-06-14', tag: 'CONFIDENTIEL',
+    text: 'Une fuite mineure a ete detectee dans la chambre de confinement B-12 a 03h42. Les protocoles de quarantaine automatique se sont declenches sans incident. Aucune exposition du personnel n\'est a deplorer. Une inspection complete du systeme de ventilation est recommandee sous 48h.',
+    imageUrl: 'assets/images/umbrella.jpg', videoUrl: '', audioUrl: ''
+  },
+  {
+    id: 'r2', title: 'Compte-rendu de surveillance — Camera Lab-3',
+    author: 'Sgt. Klaus Renner', role: 'Securite interne',
+    date: '2026-06-20', tag: 'INTERNE',
+    text: 'Extrait video joint montrant une activite inhabituelle relevee par la camera du secteur Lab-3 durant la ronde de nuit. Aucune anomalie humaine detectee, probable artefact du systeme d\'eclairage de secours.',
+    imageUrl: '', videoUrl: 'assets/videos/1105533363-preview.mp4', audioUrl: ''
+  },
+  {
+    id: 'r3', title: 'Bulletin hebdomadaire — Direction generale',
+    author: 'Conseil d\'administration', role: 'Direction Umbrella Corp',
+    date: '2026-07-01', tag: 'PUBLIC',
+    text: 'Synthese des operations de la semaine : aucun incident majeur signale sur l\'ensemble des sites. Les indicateurs de production restent stables. Prochaine reunion du conseil prevue la semaine prochaine.',
+    imageUrl: '', videoUrl: '', audioUrl: ''
+  }
+];
+
+function loadReports() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED));
+  return SEED.slice();
+}
+function saveReports(reports) { localStorage.setItem(STORAGE_KEY, JSON.stringify(reports)); }
+
+let reports = loadReports();
+let activeTag = 'ALL';
+let query = '';
+
+const grid = document.getElementById('grid');
+const stamp = document.getElementById('stamp');
+
+function tickStamp() { stamp.textContent = new Date().toLocaleString('fr-FR'); }
+setInterval(tickStamp, 1000); tickStamp();
+
+function mediaIcons(r) {
+  let out = '';
+  if (r.imageUrl) out += '🖼 ';
+  if (r.videoUrl) out += '▶ ';
+  if (r.audioUrl) out += '🔊 ';
+  return out || '—';
+}
+
+function render() {
+  grid.innerHTML = '';
+  const filtered = reports.filter(r => {
+    const matchTag = activeTag === 'ALL' || r.tag === activeTag;
+    const q = query.toLowerCase();
+    const matchQuery = !q || (r.title + r.author + r.text).toLowerCase().includes(q);
+    return matchTag && matchQuery;
+  }).sort((a, b) => b.date.localeCompare(a.date));
+
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="empty">Aucun rapport ne correspond a ces criteres.</div>';
+    return;
+  }
+
+  filtered.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    const thumbStyle = r.imageUrl ? `background-image:url('${r.imageUrl}');` : '';
+    card.innerHTML = `
+      <div class="card-thumb" style="${thumbStyle}">${r.imageUrl ? '' : '📄'}</div>
+      <div class="card-body">
+        <div class="card-tag ${r.tag}">${r.tag}</div>
+        <div class="card-title">${r.title}</div>
+        <div class="card-meta"><b>${r.author}</b> — ${r.role || 'N/A'}<br>${new Date(r.date).toLocaleDateString('fr-FR')}</div>
+        <div class="card-media-icons">${mediaIcons(r)}</div>
+        <div class="card-actions">
+          <button class="mini-btn" data-view="${r.id}">OUVRIR</button>
+          <button class="mini-btn" data-edit="${r.id}">MODIFIER</button>
+          <button class="mini-btn danger" data-del="${r.id}">SUPPRIMER</button>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+/* ---------- filters / search ---------- */
+document.querySelectorAll('.tag-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeTag = btn.dataset.tag;
+    render();
+  });
+});
+document.getElementById('search').addEventListener('input', e => { query = e.target.value; render(); });
+
+/* ============================================================
+   MINI WINDOW MANAGER — draggable popups (same spirit as the
+   terminal's floating windows in the main umbrella-shell project)
+   ============================================================ */
+const desktopLayer = document.getElementById('desktop-layer');
+let zTop = 900;
+let cascade = 0;
+
+function spawnWindow(title, bodyHtml, opts = {}) {
+  cascade = (cascade + 28) % 220;
+  const win = document.createElement('div');
+  win.className = 'pop-win';
+  win.style.left = (Math.max(20, (window.innerWidth - 480) / 2) + cascade - 100) + 'px';
+  win.style.top = (60 + cascade) + 'px';
+  if (opts.width) win.style.width = opts.width + 'px';
+  win.style.zIndex = ++zTop;
+
+  win.innerHTML = `
+    <div class="pop-win-titlebar">
+      <span>${title}</span>
+      <span class="pop-win-close">✕</span>
+    </div>
+    <div class="pop-win-body">${bodyHtml}</div>
+    <div class="pop-win-resize"></div>
+  `;
+  desktopLayer.appendChild(win);
+
+  const titlebar = win.querySelector('.pop-win-titlebar');
+  const closeBtn = win.querySelector('.pop-win-close');
+  const resizeHandle = win.querySelector('.pop-win-resize');
+
+  closeBtn.addEventListener('click', () => win.remove());
+  win.addEventListener('mousedown', () => { win.style.zIndex = ++zTop; });
+
+  let dragging = false, ox = 0, oy = 0;
+  titlebar.addEventListener('mousedown', e => {
+    if (e.target === closeBtn) return;
+    dragging = true;
+    ox = e.clientX - win.offsetLeft;
+    oy = e.clientY - win.offsetTop;
+    win.style.zIndex = ++zTop;
+    e.preventDefault();
+  });
+  window.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    win.style.left = Math.max(0, e.clientX - ox) + 'px';
+    win.style.top = Math.max(0, e.clientY - oy) + 'px';
+  });
+  window.addEventListener('mouseup', () => { dragging = false; });
+
+  let resizing = false, sx = 0, sy = 0, sw = 0, sh = 0;
+  resizeHandle.addEventListener('mousedown', e => {
+    resizing = true; sx = e.clientX; sy = e.clientY;
+    sw = win.offsetWidth; sh = win.offsetHeight;
+    e.stopPropagation(); e.preventDefault();
+  });
+  window.addEventListener('mousemove', e => {
+    if (!resizing) return;
+    win.style.width = Math.max(320, sw + (e.clientX - sx)) + 'px';
+  });
+  window.addEventListener('mouseup', () => { resizing = false; });
+
+  return win;
+}
+
+/* ---------- view / edit / delete (event delegation on the grid) ---------- */
+grid.addEventListener('click', e => {
+  const viewId = e.target.dataset.view;
+  const editId = e.target.dataset.edit;
+  const delId = e.target.dataset.del;
+  if (viewId) openView(viewId);
+  if (editId) openForm(editId);
+  if (delId) {
+    if (confirm('Supprimer definitivement ce rapport ?')) {
+      reports = reports.filter(r => r.id !== delId);
+      saveReports(reports);
+      render();
+    }
+  }
+});
+
+function openView(id) {
+  const r = reports.find(x => x.id === id);
+  if (!r) return;
+  const initials = r.author.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  let mediaHtml = '';
+  if (r.imageUrl) mediaHtml += `<div class="detail-media"><img src="${r.imageUrl}"><div class="cap">🖼 PIECE JOINTE — IMAGE</div></div>`;
+  if (r.videoUrl) mediaHtml += `<div class="detail-media"><video src="${r.videoUrl}" controls></video><div class="cap">▶ PIECE JOINTE — VIDEO</div></div>`;
+  if (r.audioUrl) mediaHtml += `<div class="detail-media"><audio src="${r.audioUrl}" controls></audio><div class="cap">🔊 PIECE JOINTE — AUDIO</div></div>`;
+
+  const html = `
+    <div class="author-row">
+      <div class="author-avatar">${initials}</div>
+      <div>
+        <div class="author-name">${r.author}</div>
+        <div class="author-role">${r.role || ''}</div>
+      </div>
+      <div class="detail-date">${new Date(r.date).toLocaleDateString('fr-FR')}<br><span class="card-tag ${r.tag}" style="margin-top:4px; display:inline-block;">${r.tag}</span></div>
+    </div>
+    <div class="detail-title">${r.title}</div>
+    <div class="detail-text">${r.text}</div>
+    ${mediaHtml}
+  `;
+  spawnWindow('RAPPORT // ' + r.id.toUpperCase(), html, { width: 460 });
+}
+
+/* ---------- create / edit form (built fresh per window, ids scoped by uid) ---------- */
+function buildFormHtml(r, uid) {
+  return `
+    <form id="form-${uid}">
+      <div class="f-row">
+        <div><label>TITRE DU RAPPORT</label><input type="text" id="title-${uid}" value="${r ? r.title.replace(/"/g, '&quot;') : ''}" required></div>
+      </div>
+      <div class="f-row">
+        <div><label>AUTEUR</label><input type="text" id="author-${uid}" value="${r ? r.author.replace(/"/g, '&quot;') : ''}" required></div>
+        <div><label>FONCTION</label><input type="text" id="role-${uid}" placeholder="ex : Chercheur senior" value="${r ? (r.role || '').replace(/"/g, '&quot;') : ''}"></div>
+      </div>
+      <div class="f-row">
+        <div><label>DATE</label><input type="date" id="date-${uid}" value="${r ? r.date : new Date().toISOString().slice(0, 10)}" required></div>
+        <div><label>CLASSIFICATION</label>
+          <select id="tag-${uid}">
+            <option value="PUBLIC">PUBLIC</option>
+            <option value="INTERNE">INTERNE</option>
+            <option value="CONFIDENTIEL">CONFIDENTIEL</option>
+            <option value="URGENT">URGENT</option>
+          </select>
+        </div>
+      </div>
+      <div class="f-row">
+        <div><label>CONTENU DU RAPPORT</label><textarea id="text-${uid}" required>${r ? r.text : ''}</textarea></div>
+      </div>
+
+      <div class="media-field">
+        <label class="title">IMAGE</label>
+        <div class="sub">
+          <input type="text" id="imageurl-${uid}" placeholder="URL de l'image (ou choisis un fichier →)" value="${r ? (r.imageUrl || '') : ''}">
+          <input type="file" id="imagefile-${uid}" accept="image/*">
+        </div>
+      </div>
+      <div class="media-field">
+        <label class="title">VIDEO</label>
+        <div class="sub">
+          <input type="text" id="videourl-${uid}" placeholder="URL de la video (ou choisis un fichier →)" value="${r ? (r.videoUrl || '') : ''}">
+          <input type="file" id="videofile-${uid}" accept="video/*">
+        </div>
+      </div>
+      <div class="media-field">
+        <label class="title">AUDIO</label>
+        <div class="sub">
+          <input type="text" id="audiourl-${uid}" placeholder="URL de l'audio (ou choisis un fichier →)" value="${r ? (r.audioUrl || '') : ''}">
+          <input type="file" id="audiofile-${uid}" accept="audio/*">
+        </div>
+        <div class="hint">Astuce : un fichier importe localement n'est previsualisable que le temps de cette session. Pour un media permanent, renseigne une URL (ex. dans ton dossier assets/).</div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="save-btn">ENREGISTRER</button>
+        <div class="cancel-btn" data-cancel="${uid}">ANNULER</div>
+      </div>
+    </form>
+  `;
+}
+
+document.getElementById('btn-new').addEventListener('click', () => openForm(null));
+
+function openForm(id) {
+  const r = id ? reports.find(x => x.id === id) : null;
+  const uid = 'u' + Date.now() + Math.floor(Math.random() * 1000);
+  const win = spawnWindow(r ? 'MODIFIER RAPPORT' : 'NOUVEAU RAPPORT', buildFormHtml(r, uid), { width: 480 });
+
+  const get = sel => win.querySelector(sel);
+  get(`#tag-${uid}`).value = r ? r.tag : 'PUBLIC';
+
+  function wireFile(fileId, urlId) {
+    get(`#${fileId}`).addEventListener('change', e => {
+      if (e.target.files && e.target.files[0]) {
+        get(`#${urlId}`).value = URL.createObjectURL(e.target.files[0]);
+      }
+    });
+  }
+  wireFile(`imagefile-${uid}`, `imageurl-${uid}`);
+  wireFile(`videofile-${uid}`, `videourl-${uid}`);
+  wireFile(`audiofile-${uid}`, `audiourl-${uid}`);
+
+  get(`[data-cancel="${uid}"]`).addEventListener('click', () => win.remove());
+
+  get(`#form-${uid}`).addEventListener('submit', e => {
+    e.preventDefault();
+    const id2 = r ? r.id : ('r' + Date.now());
+    const newReport = {
+      id: id2,
+      title: get(`#title-${uid}`).value.trim(),
+      author: get(`#author-${uid}`).value.trim(),
+      role: get(`#role-${uid}`).value.trim(),
+      date: get(`#date-${uid}`).value,
+      tag: get(`#tag-${uid}`).value,
+      text: get(`#text-${uid}`).value.trim(),
+      imageUrl: get(`#imageurl-${uid}`).value.trim(),
+      videoUrl: get(`#videourl-${uid}`).value.trim(),
+      audioUrl: get(`#audiourl-${uid}`).value.trim()
+    };
+    const idx = reports.findIndex(x => x.id === id2);
+    if (idx >= 0) reports[idx] = newReport; else reports.push(newReport);
+    saveReports(reports);
+    win.remove();
+    render();
+  });
+}
+</script>
+</body>
+</html>

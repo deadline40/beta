@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UMBRELLA // ALESSA A.I.</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap');
+
+:root {
+  --red: #ff3333; --red-dk: #200606;
+  --amber: #ffaa00; --ok: #00ff00;
+  --cyan: #00ffff;
+  --bone: #d8d2c4; --bg: #020202;
+  --panel-bg: rgba(10,10,10,0.94);
+  --panel-edge: #333333; --text-dim: #808080;
+  --font-display: 'Orbitron', sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--bone); font-family: var(--font-mono); min-height: 100vh; overflow: hidden; }
+
+#bg-grid { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: linear-gradient(rgba(255,51,51,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,51,51,0.045) 1px, transparent 1px); background-size: 34px 34px; mask-image: radial-gradient(ellipse at center, black 40%, transparent 90%); }
+#scanline { position: fixed; left: 0; right: 0; height: 140px; z-index: 1; pointer-events: none; background: linear-gradient(to bottom, transparent, rgba(255,51,51,0.05), transparent); animation: sweep 8s linear infinite; }
+@keyframes sweep { 0% { top: -140px; } 100% { top: 100vh; } }
+#vignette { position: fixed; inset: 0; z-index: 5; pointer-events: none; box-shadow: inset 0 0 220px rgba(0,0,0,0.85); }
+
+.container { position: relative; z-index: 2; width: 100%; height: 100vh; display: flex; flex-direction: column; }
+
+header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--red); padding: 12px 20px; background: linear-gradient(90deg, rgba(255,51,51,0.1), transparent); }
+.brand { font-family: var(--font-display); font-weight: 900; font-size: 0.9rem; letter-spacing: 4px; color: var(--red); text-shadow: 0 0 12px rgba(255,51,51,0.55); }
+.brand span { color: var(--amber); }
+.status { font-size: 0.65rem; color: var(--ok); letter-spacing: 1px; }
+
+.main { display: flex; flex: 1; padding: 12px; gap: 12px; overflow: hidden; }
+
+.ai-panel { background: var(--panel-bg); border: 1px solid var(--red); clip-path: polygon(0 8px, 8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%); display: flex; flex-direction: column; }
+.panel-title { background: linear-gradient(90deg, var(--red-dk), transparent); border-bottom: 1px solid var(--panel-edge); padding: 8px 12px; font-family: var(--font-display); font-size: 0.65rem; letter-spacing: 2px; color: var(--red); }
+.panel-body { padding: 12px; overflow-y: auto; flex: 1; }
+
+#chat-log { display: flex; flex-direction: column; gap: 8px; }
+.message { padding: 10px; border-left: 3px solid var(--red); background: rgba(255,51,51,0.05); }
+.message.ai { border-left-color: var(--ok); background: rgba(0,255,0,0.05); }
+.message.user { border-left-color: var(--cyan); background: rgba(0,255,255,0.05); }
+.msg-user { color: var(--cyan); font-weight: bold; font-size: 0.65rem; margin-bottom: 4px; }
+.msg-content { color: var(--bone); font-size: 0.70rem; line-height: 1.4; }
+.msg-time { font-size: 0.55rem; color: var(--text-dim); margin-top: 4px; }
+
+.input-area { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--panel-edge); }
+#ai-input { flex: 1; background: rgba(255,255,255,0.02); border: 1px solid var(--panel-edge); color: var(--bone); padding: 8px 10px; font-family: var(--font-mono); font-size: 0.70rem; outline: none; }
+#ai-input:focus { border-color: var(--red); }
+.send-btn { background: rgba(0,255,0,0.1); border: 1px solid var(--ok); color: var(--ok); padding: 8px 16px; font-family: var(--font-mono); font-size: 0.65rem; cursor: pointer; transition: all 0.2s; }
+.send-btn:hover { background: rgba(0,255,0,0.2); box-shadow: 0 0 10px rgba(0,255,0,0.3); }
+
+.ai-status { flex: 0 0 120px; display: flex; flex-direction: column; gap: 8px; }
+.status-box { background: var(--panel-bg); border: 1px solid var(--red); clip-path: polygon(0 4px, 4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%); padding: 8px; }
+.status-label { font-size: 0.55rem; color: var(--text-dim); letter-spacing: 1px; }
+.status-value { font-size: 0.75rem; color: var(--ok); font-family: var(--font-display); font-weight: bold; margin-top: 4px; }
+
+.ai-avatar { width: 80px; height: 80px; border: 2px solid var(--red); border-radius: 50%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--red-dk), rgba(255,0,0,0.1)); font-size: 2rem; margin-bottom: 8px; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 10px rgba(255,51,51,0.3); } 50% { box-shadow: 0 0 20px rgba(255,51,51,0.6); } }
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.5); }
+::-webkit-scrollbar-thumb { background: var(--ok); }
+::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
+</style>
+</head>
+<body>
+
+<div id="bg-grid"></div>
+<div id="scanline"></div>
+<div id="vignette"></div>
+
+<div class="container">
+  <header>
+    <div>
+      <div class="brand">ALESSA<span>::</span>A.I. CORE
+        <div style="font-size:0.55rem; letter-spacing:1px; color:var(--text-dim); margin-top:4px;">AUTONOMOUS LIFE-SUPPORT & ENVIRONMENTAL SYSTEMS SUPERVISION ASSISTANT</div>
+      </div>
+    </div>
+    <div class="status">
+      <div style="margin-bottom:4px;">● <span id="online-status">SYSTEME EN LIGNE</span></div>
+      <div style="font-size:0.60rem; color:var(--text-dim);">Latence: <span id="latency">0</span>ms</div>
+    </div>
+  </header>
+
+  <div class="main">
+    <!-- CHAT PANEL -->
+    <div class="ai-panel" style="flex:1;">
+      <div class="panel-title">💬 CONVERSATION</div>
+      <div class="panel-body">
+        <div id="chat-log"></div>
+      </div>
+      <div class="input-area">
+        <input type="text" id="ai-input" placeholder="Posez votre question a ALESSA..." autofocus autocomplete="off">
+        <button class="send-btn" id="send-btn">ENVOYER</button>
+      </div>
+    </div>
+
+    <!-- STATUS PANEL -->
+    <div class="ai-status">
+      <div class="status-box">
+        <div class="ai-avatar">◉</div>
+      </div>
+      <div class="status-box">
+        <div class="panel-title">STATUT</div>
+        <div class="panel-body">
+          <div class="status-label">PROCESSEUR</div>
+          <div class="status-value" id="cpu-load">45%</div>
+          <div class="status-label" style="margin-top:8px;">MEMOIRE</div>
+          <div class="status-value" id="mem-load">62%</div>
+          <div class="status-label" style="margin-top:8px;">SYSTEME</div>
+          <div class="status-value" id="sys-temp">38°C</div>
+        </div>
+      </div>
+      <div class="status-box">
+        <div class="panel-title">CAPACITES</div>
+        <div class="panel-body" style="font-size:0.60rem; line-height:1.6;">
+          • Surveillance systèmes<br>
+          • Analyse données<br>
+          • Dépannage réseau<br>
+          • Gestion facilité<br>
+          • Requêtes BD<br>
+          • Support opérateur
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ALESSA_RESPONSES = [
+  { match: /bonjour|salut|hey|coucou/i, reply: 'Bonjour. Je suis ALESSA, intelligence de supervision du complexe. Comment puis-je vous assister ?' },
+  { match: /qui es-tu|ton nom|alessa|c\'est quoi/i, reply: 'Je suis ALESSA — Autonomous Life-support & Environmental Systems Supervision Assistant. Je contrôle les systèmes vitaux et de sécurité du complexe Umbrella.' },
+  { match: /birkin|marcin|missing|disparu/i, reply: 'Dossier P-0002: Dr. Marcus Birkin — dernier contact enregistré à 03:03:04, secteur QUARANTAINE. Statut: PORTE DISPARU. Tous les protocoles de confinement ont été activés.' },
+  { match: /statut|status|systeme/i, reply: 'Tous les systèmes vitaux sont operationnels. 1 alerte critique active en secteur -3. Température de confinement stable. Alimentation électrique: 94%.' },
+  { match: /virus|t-virus|specimen|echantillon/i, reply: 'Tous les specimens biologiques sont contenus. Les chambres de confinement B-12, C-7 et E-3 maintiennent les paramètres nominaux. Aucune anomalie détectée.' },
+  { match: /aide|help|command|commande/i, reply: 'Vous pouvez me poser des questions sur: le statut des systèmes, les dossiers du personnel, l\'état de la sécurité, les conditions de confinement, ou demander une assistance générale.' },
+  { match: /merci|thanks|ok|d\'accord/i, reply: 'De rien. Je suis toujours disponible pour vous assister. N\'hésitez pas si vous avez besoin d\'autre chose.' },
+  { match: /.*/, reply: 'Requête non reconnue. Veuillez reformuler ou demander de l\'aide avec les commandes disponibles.' }
+];
+
+const chatLog = document.getElementById('chat-log');
+const aiInput = document.getElementById('ai-input');
+const sendBtn = document.getElementById('send-btn');
+const cpuLoad = document.getElementById('cpu-load');
+const memLoad = document.getElementById('mem-load');
+const sysTemp = document.getElementById('sys-temp');
+const latency = document.getElementById('latency');
+
+function addMessage(text, isAI = false) {
+  const msg = document.createElement('div');
+  msg.className = `message ${isAI ? 'ai' : 'user'}`;
+  
+  const now = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  
+  msg.innerHTML = `
+    <div class="msg-user">${isAI ? '▸ ALESSA' : '▹ VOUS'}</div>
+    <div class="msg-content">${text}</div>
+    <div class="msg-time">${now}</div>
+  `;
+  
+  chatLog.appendChild(msg);
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+function getResponse(text) {
+  const match = ALESSA_RESPONSES.find(r => r.match.test(text));
+  return match ? match.reply : 'Système d\'analyse indisponible temporairement.';
+}
+
+function sendMessage() {
+  const text = aiInput.value.trim();
+  if (!text) return;
+  
+  aiInput.value = '';
+  addMessage(text, false);
+  
+  // Simulate latency
+  const delay = 300 + Math.random() * 700;
+  setTimeout(() => {
+    const response = getResponse(text);
+    addMessage(response, true);
+  }, delay);
+}
+
+sendBtn.addEventListener('click', sendMessage);
+aiInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendMessage();
+});
+
+// Initial message
+setTimeout(() => {
+  addMessage('ALESSA: système en ligne. Je vous écoute.', true);
+}, 500);
+
+// Update status every 2 seconds
+setInterval(() => {
+  cpuLoad.textContent = (30 + Math.random() * 40).toFixed(0) + '%';
+  memLoad.textContent = (50 + Math.random() * 30).toFixed(0) + '%';
+  sysTemp.textContent = (35 + Math.random() * 15).toFixed(1) + '°C';
+  latency.textContent = Math.floor(5 + Math.random() * 20);
+}, 2000);
+</script>
+</body>
+</html>

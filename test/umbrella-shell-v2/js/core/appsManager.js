@@ -132,11 +132,15 @@ const UmbrellaApps = {
         this.currentApp = appName;
         this.logUserActivity(`Opened module: ${appName.toUpperCase()}`);
         const handlers = {
-            personnel: () => this.openPersonnel(),
-            security:  () => this.openSecurity(),
-            database:  () => this.openDatabase(),
-            network:   () => this.openNetwork(),
-            decryptor: () => this.openDecryptor(),
+            personnel: () => AppPersonnel.openEmbedded(),
+            security:  () => AppSecurity.openEmbedded(),
+            database:  () => AppDatabase.openEmbedded(),
+            camera:    () => AppCamera.openEmbedded(),
+            archive:   () => AppArchive.openEmbedded(),
+            reports:   () => AppReports.openEmbedded(),
+            network:   () => AppNetwork.openEmbedded(),
+            decryptor: () => AppDecrypter.openEmbedded(),
+            allessa:   () => AppAllessa.openEmbedded(),
         };
         if (handlers[appName]) handlers[appName]();
     },

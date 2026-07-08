@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UMBRELLA // SECURITY LOGS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap');
+
+:root {
+  --red: #ff3333; --red-dk: #200606;
+  --amber: #ffaa00; --ok: #00ff00;
+  --bone: #d8d2c4; --bg: #020202;
+  --panel-bg: rgba(10,10,10,0.94);
+  --panel-edge: #333333; --text-dim: #808080;
+  --font-display: 'Orbitron', sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--bone); font-family: var(--font-mono); min-height: 100vh; overflow-x: hidden; }
+#bg-grid {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: linear-gradient(rgba(255,51,51,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,51,51,0.045) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 90%);
+}
+#scanline { position: fixed; left: 0; right: 0; height: 140px; z-index: 1; pointer-events: none; background: linear-gradient(to bottom, transparent, rgba(255,51,51,0.05), transparent); animation: sweep 8s linear infinite; }
+@keyframes sweep { 0% { top: -140px; } 100% { top: 100vh; } }
+#vignette { position: fixed; inset: 0; z-index: 5; pointer-events: none; box-shadow: inset 0 0 220px rgba(0,0,0,0.85); }
+
+.wrap { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; padding: 32px 20px 80px; }
+
+header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--red); padding-bottom: 16px; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+.brand { font-family: var(--font-display); font-weight: 900; font-size: 1.3rem; letter-spacing: 4px; color: var(--red); text-shadow: 0 0 12px rgba(255,51,51,0.55); }
+.brand span { color: var(--amber); }
+.brand small { display: block; font-family: var(--font-mono); font-weight: 400; font-size: 0.62rem; letter-spacing: 2px; color: var(--text-dim); margin-top: 4px; }
+.clearance { text-align: right; font-size: 0.68rem; color: var(--text-dim); letter-spacing: 1px; }
+.clearance b { color: var(--red); }
+.dot { display:inline-block; width:6px; height:6px; border-radius:50%; background: var(--ok); margin-right:5px; box-shadow: 0 0 6px var(--ok); animation: blink 1.6s infinite; }
+@keyframes blink { 50% { opacity: 0.25; } }
+
+.toolbar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+.tag-btn { border: 1px solid var(--panel-edge); background: rgba(255,51,51,0.03); color: var(--text-dim); font-size: 0.6rem; letter-spacing: 1px; padding: 8px 12px; cursor: pointer; font-family: var(--font-mono); }
+.tag-btn:hover { border-color: var(--red); color: var(--red); }
+.tag-btn.active { border-color: var(--red); color: var(--red); background: rgba(255,51,51,0.1); }
+
+.logs-container { display: flex; flex-direction: column; gap: 8px; }
+.log-entry { background: var(--panel-bg); border: 1px solid var(--panel-edge); padding: 12px; clip-path: polygon(0 8px, 8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%); }
+.log-time { color: var(--amber); font-size: 0.70rem; letter-spacing: 1px; display: inline-block; margin-right: 12px; min-width: 80px; }
+.log-location { color: var(--text-dim); font-size: 0.65rem; display: inline-block; margin-right: 12px; }
+.log-msg { color: var(--bone); font-size: 0.75rem; line-height: 1.4; }
+.log-level-crit { border-left: 3px solid var(--red); background: rgba(255,51,51,0.05); }
+.log-level-warn { border-left: 3px solid var(--amber); background: rgba(255,170,0,0.05); }
+.log-level-info { border-left: 3px solid var(--ok); background: rgba(0,255,0,0.02); }
+.log-level-crit .log-level-badge { color: var(--red); }
+.log-level-warn .log-level-badge { color: var(--amber); }
+.log-level-info .log-level-badge { color: var(--ok); }
+.log-level-badge { font-size: 0.60rem; letter-spacing: 1px; font-weight: bold; }
+
+.empty { color: #555; font-size: 0.75rem; text-align: center; padding: 40px 0; }
+footer { margin-top: 40px; text-align: center; font-size: 0.6rem; color: var(--text-dim); letter-spacing: 1px; }
+</style>
+</head>
+<body>
+
+<div id="bg-grid"></div>
+<div id="scanline"></div>
+<div id="vignette"></div>
+
+<div class="wrap">
+  <header>
+    <div class="brand">UMBRELLA<span>::</span>SECURITY LOGS
+      <small>JOURNAL DE SECURITE — INCIDENTS ET ALERTES 24H</small>
+    </div>
+    <div class="clearance">
+      <div><span class="dot"></span><b>CONNEXION SECURISEE</b></div>
+      <div>ACCES NIVEAU 5 — <span id="stamp"></span></div>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <div class="tag-btn active" data-tag="ALL">TOUS</div>
+    <div class="tag-btn" data-tag="crit">CRITIQUE</div>
+    <div class="tag-btn" data-tag="warn">ATTENTION</div>
+    <div class="tag-btn" data-tag="info">INFO</div>
+  </div>
+
+  <div class="logs-container" id="logs"></div>
+
+  <footer>UMBRELLA CORPORATION © — derniere mise a jour: <span id="update-time">--:--:--</span></footer>
+</div>
+
+<script>
+const SECURITY_LOGS = [
+  { id: 'SEC-001', t: '03:40:02', loc: 'LEVEL -3',   level: 'crit', msg: 'Breach detected — unauthorized entry confirmed.' },
+  { id: 'SEC-002', t: '03:22:16', loc: 'POWER GRID', level: 'warn', msg: 'Backup generator activated. Primary offline.' },
+  { id: 'SEC-003', t: '03:10:44', loc: 'CAM-07',     level: 'warn', msg: 'Surveillance camera 7 offline. Signal lost.' },
+  { id: 'SEC-004', t: '03:03:04', loc: 'LAB-3',      level: 'crit', msg: 'Loss of contact — Dr. Birkin. Last ping 03:03.' },
+  { id: 'SEC-005', t: '02:47:51', loc: 'DOOR_L3',    level: 'warn', msg: 'Invalid badge detected at Lab-3 entrance.' },
+  { id: 'SEC-006', t: '02:14:08', loc: 'SECTOR_B',   level: 'info', msg: 'Security patrol sector B — all clear.' },
+];
+
+const logsEl = document.getElementById('logs');
+const stamp = document.getElementById('stamp');
+const updateTime = document.getElementById('update-time');
+let activeLevel = 'ALL';
+
+function tickStamp() { stamp.textContent = new Date().toLocaleString('fr-FR'); updateTime.textContent = new Date().toTimeString().split(' ')[0]; }
+setInterval(tickStamp, 1000); tickStamp();
+
+function render() {
+  logsEl.innerHTML = '';
+  const filtered = SECURITY_LOGS.filter(l => activeLevel === 'ALL' || l.level === activeLevel);
+  
+  if (!filtered.length) {
+    logsEl.innerHTML = '<div class="empty">Aucun log correspondant a ces criteres.</div>';
+    return;
+  }
+
+  filtered.forEach(log => {
+    const entry = document.createElement('div');
+    entry.className = `log-entry log-level-${log.level}`;
+    entry.innerHTML = `
+      <span class="log-time">[${log.t}]</span>
+      <span class="log-location">${log.loc}</span>
+      <span class="log-level-badge">[${log.level.toUpperCase()}]</span>
+      <div class="log-msg">${log.msg}</div>
+    `;
+    logsEl.appendChild(entry);
+  });
+}
+
+document.querySelectorAll('.tag-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeLevel = btn.dataset.tag;
+    render();
+  });
+});
+
+render();
+</script>
+</body>
+</html>
