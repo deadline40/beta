@@ -82,37 +82,103 @@ const UmbrellaApps = {
 
     startBottomAnimations() {
         const codeEl = document.getElementById('stream-infinite-code');
-        if (codeEl) {
-            const lines = [
-                `HEX_${Math.random().toString(16).substr(2,5).toUpperCase()} >> PING OK`,
-                `SYNC_BLOCK_${Math.floor(Math.random()*8000)} ... SUCCESS`,
-                `01001101 01000001 01000100 010240`,
-                `LOAD_AVERAGE: ${(Math.random()*2).toFixed(2)} / mem_alloc`,
-                `OVERFLOW_PROTECT: STABLE // active_state`,
-                `PKT_RECV: 0x${Math.floor(Math.random()*65535).toString(16).toUpperCase()}`,
-            ];
-            setInterval(() => {
-                codeEl.innerHTML += lines[Math.floor(Math.random()*lines.length)] + '<br>';
-                const rows = codeEl.innerHTML.split('<br>');
-                if (rows.length > 12) codeEl.innerHTML = rows.slice(1).join('<br>');
-            }, 350);
-        }
-
         const writerEl = document.getElementById('stream-auto-writer');
-        const code = `function initMainframe() {\n  const target = "10.240.0.12";\n  let secure = true;\n  if (secure) {\n    connect(target);\n    loadModules(["T-Virus","NEalpha"]);\n    console.log("System Armed");\n  }\n}`;
-        let ci = 0;
-        if (writerEl) {
+        const activityEl = document.getElementById('stream-user-activity');
+
+        // ══════════════════════════════════════════════════════════════
+        // PANEL 1: SYSTEM MATRIX STREAM (code + hex + status lines)
+        // ══════════════════════════════════════════════════════════════
+        if (codeEl) {
+            const codeLines = [
+                `<span style="color:#00ff00">HEX_${Math.random().toString(16).substr(2,5).toUpperCase()}</span> >> PING OK`,
+                `<span style="color:#00aaff">SYNC_BLOCK</span>_${Math.floor(Math.random()*8000)} ... <span style="color:#00ff88">SUCCESS</span>`,
+                `<span style="color:#ffff00">01001101</span> <span style="color:#00ff88">01000001</span> <span style="color:#ff6666">01000100</span>`,
+                `<span style="color:#888">//</span> <span style="color:#00aaff">LOAD_AVERAGE</span>: ${(Math.random()*2).toFixed(2)} <span style="color:#888">/ mem_alloc</span>`,
+                `<span style="color:#0f0">✓</span> OVERFLOW_PROTECT: <span style="color:#0f0">STABLE</span>`,
+                `PKT_RECV: <span style="color:#ffaa00">0x${Math.floor(Math.random()*65535).toString(16).toUpperCase()}</span>`,
+                `TEMP_CORE: <span style="color:#${Math.random()>0.5?'ff6666':'0f0'}">${(35+Math.random()*15).toFixed(1)}°C</span>`,
+                `CACHE_HIT: <span style="color:#00ff88">${Math.floor(Math.random()*100)}%</span> | MISS: <span style="color:#ff6666">${Math.floor(Math.random()*10)}%</span>`,
+                `<span style="color:#888">[</span><span style="color:#0f0">${new Date().toLocaleTimeString()}</span><span style="color:#888">]</span> KERNEL HEARTBEAT`,
+                `SECURE_BOOT: <span style="color:#0f0">VERIFIED</span> | FIRMWARE: <span style="color:#00aaff">v1.94.2</span>`,
+                `BUFFER_POOL: <span style="color:#ffaa00">${Math.floor(Math.random()*100)}MB</span> / 512MB`,
+                `<span style="color:#ff6666">⚠</span> THRESHOLD BREACH — <span style="color:#ff6666">SECTOR_3_TEMP</span> — <span style="color:#ff6666">45.2°C</span>`,
+            ];
+
+            const codeBuffer = [];
+            const maxLines = 13;
+
             setInterval(() => {
-                if (ci < code.length) {
-                    writerEl.innerHTML += code[ci] === '\n' ? '<br>' : code[ci];
-                    ci++;
-                } else {
-                    setTimeout(() => { writerEl.innerHTML = ''; ci = 0; }, 2500);
-                }
-            }, 55);
+                const newLine = codeLines[Math.floor(Math.random() * codeLines.length)];
+                codeBuffer.push(newLine);
+                if (codeBuffer.length > maxLines) codeBuffer.shift();
+                codeEl.innerHTML = codeBuffer.join('<br>');
+                codeEl.scrollTop = codeEl.scrollHeight;
+            }, 280);
         }
 
+        // ══════════════════════════════════════════════════════════════
+        // PANEL 2: AUTO-COMPILER (multiple code snippets rotating)
+        // ══════════════════════════════════════════════════════════════
+        if (writerEl) {
+            const codeSnippets = [
+                `function initMainframe() {\n  const target = "10.240.0.12";\n  let secure = true;\n  if (secure) {\n    connect(target);\n    loadModules(["T-Virus","NEalpha"]);\n    console.log("System Armed");\n  }\n}`,
+                `class HiveController {\n  constructor() {\n    this.nodes = [];\n    this.threat_level = CRITICAL;\n  }\n  sync() {\n    this.nodes.forEach(n => n.update());\n    return this.status();\n  }\n}`,
+                `const config = {\n  facility: "UMBRELLA_HQ",\n  containment: true,\n  backup: "MULTIPLE",\n  lockdown: true,\n  emergency: false,\n  biohazard_lvl: 5,\n  auto_sterilize: true\n};`,
+                `async function scanBioDatabases() {\n  try {\n    const projects = await fetch('/api/projects');\n    projects.forEach(p => {\n      if (p.threat > 3) alert_sector(p.zone);\n    });\n  } catch(e) {\n    console.error("CRITICAL:", e);\n  }\n}`,
+            ];
+
+            let currentSnippet = 0;
+            let charIndex = 0;
+
+            const displayCode = () => {
+                const code = codeSnippets[currentSnippet];
+                let htmlCode = '';
+
+                for (let i = 0; i < charIndex; i++) {
+                    const char = code[i];
+                    if (char === '\n') htmlCode += '<br>';
+                    else if (char === ' ') htmlCode += '&nbsp;';
+                    else if (/[(){}\[\];:,]/.test(char)) htmlCode += `<span style="color:#ffaa00">${char}</span>`;
+                    else if (/[0-9]/.test(char)) htmlCode += `<span style="color:#00ff88">${char}</span>`;
+                    else if (/[a-z]/i.test(char)) htmlCode += `<span style="color:#00aaff">${char}</span>`;
+                    else htmlCode += char;
+                }
+
+                writerEl.innerHTML = htmlCode;
+                if (charIndex < code.length) {
+                    charIndex++;
+                    setTimeout(displayCode, 12);
+                } else {
+                    setTimeout(() => {
+                        currentSnippet = (currentSnippet + 1) % codeSnippets.length;
+                        charIndex = 0;
+                        writerEl.innerHTML = '';
+                        displayCode();
+                    }, 3000);
+                }
+            };
+
+            displayCode();
+        }
+
+        // ══════════════════════════════════════════════════════════════
+        // PANEL 3: ACTIVITY LOG (enhanced with timestamps + colors)
+        // ══════════════════════════════════════════════════════════════
         this.logUserActivity('Mainframe terminal initialization complete.');
+
+        // Add periodic system events
+        setInterval(() => {
+            const events = [
+                `<span style="color:#888">[SYSTEM]</span> Routine backup cycle initiated`,
+                `<span style="color:#888">[SECURITY]</span> Authentication token refreshed`,
+                `<span style="color:#888">[MONITOR]</span> All systems nominal`,
+                `<span style="color:#ff6666">[ALERT]</span> Temperature threshold warning`,
+                `<span style="color:#00ff88">[SUCCESS]</span> Network synchronization complete`,
+                `<span style="color:#ffaa00">[WARNING]</span> High memory usage detected`,
+            ];
+            const randomEvent = events[Math.floor(Math.random() * events.length)];
+            this.logUserActivity(randomEvent);
+        }, 8000);
     },
 
     logUserActivity(text) {
