@@ -12,6 +12,12 @@
     <link rel="stylesheet" href="css/apps.css">
 </head>
 <body>
+    <script>
+        // Authentication check
+        if (!localStorage.getItem('umbrella_auth_token')) {
+            window.location.href = 'login.html';
+        }
+    </script>
     <div id="bg-grid"></div>
     <div id="scanline"></div>
     <div id="noise"></div>
@@ -34,6 +40,30 @@
                         <span>MAINFRAME LOAD:</span>
                         <div class="progress-bar"><div id="cpu-bar" style="width: 14%;"></div></div>
                     </div>
+                </div>
+            </section>
+
+            <section class="panel" id="user-panel" style="min-height: auto;">
+                <h2 class="panel-title">USER SESSION</h2>
+                <div class="panel-content" style="flex-direction: column; gap: 8px;">
+                    <div class="status-row" style="font-size: 0.8rem;">
+                        👤 <span id="current-user" style="color: #00ff88;">--</span>
+                    </div>
+                    <button onclick="logout()" style="
+                        background: linear-gradient(90deg, rgba(255,0,0,0.2), rgba(255,51,51,0.1));
+                        border: 1px solid #ff3333;
+                        color: #ff6666;
+                        padding: 6px 10px;
+                        font-family: 'Share Tech Mono', monospace;
+                        font-size: 0.7rem;
+                        cursor: pointer;
+                        width: 100%;
+                        transition: all 0.2s;
+                        letter-spacing: 1px;
+                    " 
+                    onmouseover="this.style.boxShadow='0 0 12px rgba(255,51,51,0.5)'; this.style.transform='translateY(-1px)'"
+                    onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)'"
+                    >⬡ LOGOUT</button>
                 </div>
             </section>
 
@@ -175,5 +205,24 @@
     <script src="js/core/worldmap.js"></script>
     <script src="js/core/appsManager.js"></script>
     <script src="js/main.js"></script>
+
+    <script>
+        // Initialize user session display
+        const username = localStorage.getItem('umbrella_username') || 'Unknown';
+        const userDisplay = document.getElementById('current-user');
+        if (userDisplay) {
+            userDisplay.textContent = username.toUpperCase();
+        }
+
+        // Logout function
+        function logout() {
+            if (confirm('Êtes-vous sûr? Votre session sera terminée.')) {
+                localStorage.removeItem('umbrella_auth_token');
+                localStorage.removeItem('umbrella_username');
+                localStorage.removeItem('umbrella_remember');
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
 </body>
 </html>

@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UMBRELLA CORPORATION — Secure Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            background: #020202;
+            color: #d8d2c4;
+            font-family: 'Share Tech Mono', monospace;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Background effects */
+        #bg-grid {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-image: 
+                linear-gradient(rgba(255,51,51,0.045) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,51,51,0.045) 1px, transparent 1px);
+            background-size: 34px 34px;
+            mask-image: radial-gradient(ellipse at center, black 40%, transparent 90%);
+        }
+
+        #scanline {
+            position: fixed;
+            left: 0;
+            right: 0;
+            height: 140px;
+            z-index: 1;
+            pointer-events: none;
+            background: linear-gradient(to bottom, transparent, rgba(255,51,51,0.05), transparent);
+            animation: sweep 8s linear infinite;
+        }
+
+        @keyframes sweep {
+            0% { top: -140px; }
+            100% { top: 100vh; }
+        }
+
+        #vignette {
+            position: fixed;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            box-shadow: inset 0 0 220px rgba(0,0,0,0.85);
+        }
+
+        /* Corner accents */
+        .corner-accent {
+            position: fixed;
+            z-index: 3;
+            width: 50px;
+            height: 50px;
+            border: 2px solid #ff3333;
+        }
+
+        .corner-tl {
+            top: 40px;
+            left: 40px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .corner-tr {
+            top: 40px;
+            right: 40px;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .corner-bl {
+            bottom: 40px;
+            left: 40px;
+            border-right: none;
+            border-top: none;
+        }
+
+        .corner-br {
+            bottom: 40px;
+            right: 40px;
+            border-left: none;
+            border-top: none;
+        }
+
+        /* Corner accents */
+        .corner-accent {
+            position: fixed;
+            z-index: 3;
+            width: 50px;
+            height: 50px;
+            border: 2px solid #ff3333;
+        }
+
+        .corner-tl {
+            top: 40px;
+            left: 40px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .corner-tr {
+            top: 40px;
+            right: 40px;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .corner-bl {
+            bottom: 40px;
+            left: 40px;
+            border-right: none;
+            border-top: none;
+        }
+
+        .corner-br {
+            bottom: 40px;
+            right: 40px;
+            border-left: none;
+            border-top: none;
+        }
+
+        .login-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            animation: slideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.92);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .login-box {
+            background: linear-gradient(135deg, rgba(10,10,10,0.99), rgba(20,8,8,0.96));
+            border: 2px solid #ff3333;
+            clip-path: polygon(0 15px, 15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
+            padding: 55px 45px 45px;
+            box-shadow: 
+                0 0 60px rgba(255,51,51,0.5),
+                inset 0 0 40px rgba(255,51,51,0.1),
+                0 0 120px rgba(255,51,51,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Glitch lines */
+        .login-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #ff3333 20%, #ffaa00 50%, #ff3333 80%, transparent);
+            animation: glitch-line 3s ease-in-out infinite;
+        }
+
+        @keyframes glitch-line {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        .login-box::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(255,51,51,0.02) 0px,
+                    rgba(255,51,51,0.02) 2px,
+                    transparent 2px,
+                    transparent 4px
+                );
+            pointer-events: none;
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 0.95; }
+            50% { opacity: 1; }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.6rem;
+            font-weight: 900;
+            letter-spacing: 5px;
+            color: #ff3333;
+            text-shadow: 
+                0 0 20px rgba(255,51,51,0.6),
+                0 0 40px rgba(255,51,51,0.3);
+            margin-bottom: 10px;
+            animation: pulse-logo 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-logo {
+            0%, 100% { text-shadow: 0 0 20px rgba(255,51,51,0.6), 0 0 40px rgba(255,51,51,0.3); }
+            50% { text-shadow: 0 0 30px rgba(255,51,51,0.8), 0 0 60px rgba(255,51,51,0.5); }
+        }
+
+        .logo span {
+            color: #ffaa00;
+            animation: pulse-span 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-span {
+            0%, 100% { opacity: 0.7; transform: scaleX(0.98); }
+            50% { opacity: 1; transform: scaleX(1.02); }
+        }
+
+        .subtitle {
+            font-size: 0.72rem;
+            letter-spacing: 3px;
+            color: #ffaa00;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+            animation: flicker-text 3s ease-in-out infinite;
+        }
+
+        @keyframes flicker-text {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+            20%, 24%, 55% { opacity: 0.75; }
+        }
+
+        .security-level {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .level-indicator {
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(135deg, #ff3333, #ff6666);
+            box-shadow: 0 0 12px #ff3333;
+            animation: pulse-dot 1s ease-in-out infinite;
+        }
+
+        .level-indicator:nth-child(1) { animation-delay: 0s; }
+        .level-indicator:nth-child(2) { animation-delay: 0.2s; }
+        .level-indicator:nth-child(3) { animation-delay: 0.4s; }
+        .level-indicator:nth-child(4) { animation-delay: 0.6s; }
+
+        @keyframes pulse-dot {
+            0%, 100% { 
+                opacity: 0.2; 
+                transform: scale(0.7) translateY(0);
+            }
+            50% { 
+                opacity: 1; 
+                transform: scale(1.2) translateY(-3px);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.77rem;
+            letter-spacing: 2px;
+            color: #ffaa00;
+            margin-bottom: 9px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .form-input-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-input-wrapper::before {
+            content: '▸';
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ffaa00;
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 3;
+        }
+
+        .form-input-wrapper.active::before {
+            opacity: 1;
+            animation: blink-cursor 0.8s infinite;
+        }
+
+        @keyframes blink-cursor {
+            0%, 49%, 100% { opacity: 1; }
+            50%, 99% { opacity: 0.3; }
+        }
+
+        .form-input {
+            width: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.01), rgba(255,51,51,0.02));
+            border: 1.5px solid #ff3333;
+            color: #d8d2c4;
+            padding: 14px 14px 14px 45px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.86rem;
+            outline: none;
+            transition: all 0.3s;
+            box-shadow: 
+                inset 0 0 10px rgba(255,51,51,0.05),
+                0 0 0 rgba(255,170,0,0);
+        }
+
+        .form-input:focus {
+            border-color: #ffaa00;
+            box-shadow: 
+                inset 0 0 10px rgba(255,51,51,0.08),
+                0 0 25px rgba(255,170,0,0.5),
+                0 0 50px rgba(255,170,0,0.2);
+            background: linear-gradient(135deg, rgba(255,170,0,0.05), rgba(255,51,51,0.06));
+        }
+
+        .form-input::placeholder {
+            color: #555;
+        }
+
+        .form-input.error {
+            border-color: #ff3333;
+            box-shadow: 
+                inset 0 0 10px rgba(255,51,51,0.15),
+                0 0 25px rgba(255,51,51,0.7);
+            animation: shake-input 0.3s;
+        }
+
+        @keyframes shake-input {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        .remember-group {
+            display: flex;
+            align-items: center;
+            font-size: 0.76rem;
+            margin-bottom: 28px;
+            position: relative;
+            z-index: 2;
+            letter-spacing: 0.5px;
+        }
+
+        .checkbox {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #ffaa00;
+            background: transparent;
+            margin-right: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(255,170,0,0.3);
+        }
+
+        .checkbox:hover {
+            box-shadow: 0 0 15px rgba(255,170,0,0.6);
+            transform: scale(1.1);
+        }
+
+        .checkbox:checked {
+            background: linear-gradient(135deg, #ffaa00, #ff8800);
+            box-shadow: 0 0 20px rgba(255,170,0,0.8);
+        }
+
+        .login-button {
+            width: 100%;
+            background: linear-gradient(90deg, #ff3333 0%, #ff5555 50%, #ff3333 100%);
+            border: 2px solid #ff3333;
+            color: #fff;
+            padding: 15px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.87rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.4s;
+            box-shadow: 0 0 30px rgba(255,51,51,0.5);
+            position: relative;
+            z-index: 2;
+            overflow: hidden;
+        }
+
+        .login-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .login-button:hover::before {
+            left: 100%;
+        }
+
+        .login-button:hover {
+            background: linear-gradient(90deg, #ff5555 0%, #ff3333 50%, #ff5555 100%);
+            box-shadow: 
+                0 0 50px rgba(255,51,51,0.8),
+                inset 0 0 20px rgba(255,255,255,0.1);
+            transform: translateY(-3px);
+            letter-spacing: 4px;
+        }
+
+        .login-button:active {
+            transform: translateY(0);
+        }
+
+        .login-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, rgba(255,51,51,0.25), rgba(255,0,0,0.12));
+            border: 1.5px solid #ff3333;
+            border-left: 4px solid #ff6666;
+            color: #ff8888;
+            padding: 14px 16px;
+            font-size: 0.76rem;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideIn 0.35s ease-out;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 0 20px rgba(255,51,51,0.25);
+            letter-spacing: 0.5px;
+        }
+
+        .error-message::before {
+            content: '⚠';
+            margin-right: 10px;
+            color: #ff3333;
+            font-weight: bold;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .login-footer {
+            margin-top: 28px;
+            text-align: center;
+            font-size: 0.68rem;
+            color: #777;
+            letter-spacing: 1.5px;
+            position: relative;
+            z-index: 2;
+            text-transform: uppercase;
+        }
+
+        .demo-accounts {
+            margin-top: 26px;
+            padding-top: 22px;
+            border-top: 1px solid #ff333488;
+            font-size: 0.72rem;
+            color: #888;
+            position: relative;
+            z-index: 2;
+        }
+
+        .demo-accounts strong {
+            color: #ffaa00;
+            display: block;
+            margin-bottom: 11px;
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .account-row {
+            padding: 7px 10px;
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(90deg, rgba(255,170,0,0.05), transparent);
+            margin-bottom: 5px;
+            border-left: 2.5px solid #ffaa0055;
+            transition: all 0.25s;
+            font-size: 0.75rem;
+        }
+
+        .account-row:hover {
+            border-left-color: #ffaa00;
+            background: linear-gradient(90deg, rgba(255,170,0,0.1), transparent);
+            padding-left: 12px;
+        }
+
+        .account-user {
+            color: #00aaff;
+            font-weight: bold;
+        }
+
+        .account-pass {
+            color: #00ff88;
+        }
+
+        .status-bar {
+            position: fixed;
+            bottom: 25px;
+            left: 25px;
+            right: 25px;
+            font-size: 0.66rem;
+            color: #666;
+            letter-spacing: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 5;
+        }
+
+        .status-item {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: blink-dot 1s infinite;
+            box-shadow: 0 0 10px #00ff88;
+        }
+
+        @keyframes blink-dot {
+            0%, 49%, 100% { opacity: 1; }
+            50%, 99% { opacity: 0.2; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="bg-grid"></div>
+<div id="scanline"></div>
+<div id="vignette"></div>
+
+<div class="corner-accent corner-tl"></div>
+<div class="corner-accent corner-tr"></div>
+<div class="corner-accent corner-bl"></div>
+<div class="corner-accent corner-br"></div>
+
+<div class="login-container">
+    <div class="login-box">
+        <div class="login-header">
+            <div class="logo">UMBRELLA<span>::</span>OS</div>
+            <div class="subtitle">Secure Authentication Gateway v2.4</div>
+            <div class="security-level">
+                <div class="level-indicator"></div>
+                <div class="level-indicator"></div>
+                <div class="level-indicator"></div>
+                <div class="level-indicator"></div>
+            </div>
+        </div>
+
+        <form id="login-form">
+            <div id="error-message" class="error-message"></div>
+
+            <div class="form-group">
+                <label class="form-label">🔑 Identifiant</label>
+                <div class="form-input-wrapper" id="user-wrapper">
+                    <input 
+                        type="text" 
+                        id="username" 
+                        class="form-input" 
+                        placeholder="agent_username"
+                        autocomplete="off"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">🔐 Mot de passe</label>
+                <div class="form-input-wrapper" id="pass-wrapper">
+                    <input 
+                        type="password" 
+                        id="password" 
+                        class="form-input" 
+                        placeholder="••••••••••"
+                        autocomplete="off"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div class="remember-group">
+                <input type="checkbox" id="remember" class="checkbox">
+                <label for="remember" style="cursor: pointer; margin: 0;">Rester connecté sur ce terminal</label>
+            </div>
+
+            <button type="submit" class="login-button">⚡ CONNEXION SÉCURISÉE</button>
+
+            <div class="demo-accounts">
+                <strong>📋 Comptes de démonstration:</strong>
+                <div class="account-row">
+                    <span class="account-user">admin</span> / <span class="account-pass">umbrella2026</span>
+                </div>
+                <div class="account-row">
+                    <span class="account-user">operator</span> / <span class="account-pass">hive_protocol</span>
+                </div>
+                <div class="account-row">
+                    <span class="account-user">security</span> / <span class="account-pass">containment_active</span>
+                </div>
+            </div>
+
+            <div class="login-footer">
+                © 2026 UMBRELLA CORPORATION — CONFIDENTIAL FACILITY<br>
+                UNAUTHORIZED ACCESS WILL BE PROSECUTED
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="status-bar">
+    <div class="status-item">
+        <span class="status-dot"></span>
+        <span>SYSTEM ONLINE</span>
+    </div>
+    <div class="status-item" id="time-display">--:--:--</div>
+</div>
+
+<script>
+    // Demo accounts database
+    const ACCOUNTS = {
+        'admin': 'umbrella2026',
+        'operator': 'hive_protocol',
+        'security': 'containment_active'
+    };
+
+    const form = document.getElementById('login-form');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const userWrapper = document.getElementById('user-wrapper');
+    const passWrapper = document.getElementById('pass-wrapper');
+    const errorMsg = document.getElementById('error-message');
+    const rememberCheck = document.getElementById('remember');
+
+    // Update time display
+    function updateTime() {
+        const now = new Date();
+        document.getElementById('time-display').textContent = 
+            now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+    updateTime();
+    setInterval(updateTime, 1000);
+
+    // Focus effects
+    usernameInput.addEventListener('focus', () => userWrapper.classList.add('active'));
+    usernameInput.addEventListener('blur', () => userWrapper.classList.remove('active'));
+    passwordInput.addEventListener('focus', () => passWrapper.classList.add('active'));
+    passwordInput.addEventListener('blur', () => passWrapper.classList.remove('active'));
+
+    // Check if already logged in
+    if (localStorage.getItem('umbrella_auth_token')) {
+        window.location.href = 'index.html';
+    }
+
+    // Handle login
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
+
+        // Clear error
+        errorMsg.classList.remove('show');
+        usernameInput.classList.remove('error');
+        passwordInput.classList.remove('error');
+
+        // Validate
+        if (!username || !password) {
+            showError('Veuillez entrer identifiant et mot de passe');
+            return;
+        }
+
+        // Authenticate
+        if (ACCOUNTS[username] && ACCOUNTS[username] === password) {
+            // Success animation
+            form.style.opacity = '0';
+            form.style.transform = 'scale(0.95)';
+            
+            // Create session
+            const token = btoa(username + ':' + Date.now());
+            localStorage.setItem('umbrella_auth_token', token);
+            localStorage.setItem('umbrella_username', username);
+            
+            if (rememberCheck.checked) {
+                localStorage.setItem('umbrella_remember', 'true');
+            }
+
+            // Redirect after animation
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 500);
+        } else {
+            showError('Identifiants invalides. Accès refusé.');
+            usernameInput.classList.add('error');
+            passwordInput.classList.add('error');
+            passwordInput.value = '';
+        }
+    });
+
+    function showError(msg) {
+        errorMsg.textContent = '⚠ ' + msg;
+        errorMsg.classList.add('show');
+    }
+
+    // Focus first input
+    usernameInput.focus();
+
+    // Pre-fill if remembered
+    if (localStorage.getItem('umbrella_remember')) {
+        const savedUser = localStorage.getItem('umbrella_username');
+        if (savedUser) {
+            usernameInput.value = savedUser;
+            passwordInput.focus();
+        }
+    }
+</script>
+
+</body>
+</html>
