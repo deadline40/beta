@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Umbrella Corp - Admin Terminal</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div id="bg-grid"></div>
+    <div id="scanline"></div>
+    <div id="vignette"></div>
+
+    <div class="admin-container">
+        <!-- LOGIN OVERLAY -->
+        <div id="login-overlay" class="login-overlay">
+            <div class="login-box">
+                <div class="login-logo">UMBRELLA<span>::</span>SECURE</div>
+                <div class="login-title">AUTHENTIFICATION REQUISE</div>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label>OPERATOR ID</label>
+                        <input type="text" id="login-username" placeholder="Entrez votre identifiant" required>
+                    </div>
+                    <div class="form-group">
+                        <label>PASSWORD</label>
+                        <input type="password" id="login-password" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="admin-btn">DÉVERROUILLER</button>
+                    <div id="login-status" class="status-msg"></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- MAIN DASHBOARD -->
+        <div id="admin-dashboard" style="display:none;">
+            <header class="admin-header">
+                <div class="brand">UMBRELLA<span>::</span>ADMIN NET
+                    <small>SYSTEME DE PUBLICATION SÉCURISÉ</small>
+                </div>
+                <div class="clearance">
+                    <div><span class="dot"></span><b>CONNEXION SÉCURISÉE</b></div>
+                    <div><span id="current-user" style="color:var(--amber);"></span> | <a href="#" id="logout-btn" style="color:var(--red); text-decoration:none;">[ DÉCONNEXION ]</a></div>
+                </div>
+            </header>
+
+            <main class="admin-grid">
+                <section class="admin-panel">
+                    <h2>RÉDIGER UN NOUVEAU RAPPORT</h2>
+                    <form id="article-form">
+                        <div class="form-group">
+                            <label>TITRE DU DOCUMENT</label>
+                            <input type="text" id="title" placeholder="EX: Incident Sector 7..." required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>AUTEUR (ID)</label>
+                                <input type="text" id="author" placeholder="EX: Dr. Birkin" required>
+                            </div>
+                            <div class="form-group">
+                                <label>NIVEAU D'ACCRÉDITATION</label>
+                                <select id="clearance">
+                                    <option value="LEVEL 1">LEVEL 1 (PUBLIC)</option>
+                                    <option value="LEVEL 3">LEVEL 3 (RESTRICTED)</option>
+                                    <option value="LEVEL 5">LEVEL 5 (CLASSIFIED)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>CONTENU DU RAPPORT</label>
+                            <textarea id="content" rows="10" placeholder="Entrez les données du rapport..." required></textarea>
+                        </div>
+                        <button type="submit" class="admin-btn">▶ PUBLIER DANS L'ARCHIVE</button>
+                        <div id="form-status" class="status-msg"></div>
+                    </form>
+                </section>
+
+                <section class="admin-panel">
+                    <h2>ARCHIVES RÉCENTES</h2>
+                    <div id="articles-list" class="articles-list">
+                        <!-- Les articles apparaitront ici -->
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>

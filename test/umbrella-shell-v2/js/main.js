@@ -172,9 +172,55 @@
     return { init };
   })();
 
+  async function initSidebarArticles() {
+    const listEl = document.getElementById('sidebar-articles-list');
+    if (!listEl) return;
+    try {
+      const res = await fetch('/api/articles');
+      if (!res.ok) throw new Error('API down');
+      const articles = await res.json();
+      
+      listEl.innerHTML = '';
+      if (articles.length === 0) {
+        listEl.innerHTML = '<div style="font-size:0.7rem; color:#888;">AUCUNE PUBLICATION.</div>';
+        return;
+      }
+      
+      articles.forEach(art => {
+        const item = document.createElement('div');
+        item.style.border = '1px solid #00aaff33';
+        item.style.padding = '6px';
+        item.style.background = 'rgba(0,170,255,0.05)';
+        item.style.cursor = 'pointer';
+        item.style.transition = 'all 0.2s';
+        
+        item.innerHTML = `
+            <div style="font-size:0.75rem; font-weight:bold; color:#00aaff; margin-bottom:2px; line-height:1.2;">${art.title}</div>
+            <div style="font-size:0.6rem; color:#888;">${art.clearance} | ${art.created_at.split(' ')[0]}</div>
+        `;
+        
+        item.onmouseenter = () => { item.style.borderColor = '#00aaff'; item.style.background = 'rgba(0,170,255,0.1)'; };
+        item.onmouseleave = () => { item.style.borderColor = '#00aaff33'; item.style.background = 'rgba(0,170,255,0.05)'; };
+        
+        item.onclick = () => {
+            // Open full article in classic window popup when clicked
+            UmbrellaApps.openWindow('Document: ' + art.title, 
+                `<div style="font-size:0.8rem; color:#00aaff; margin-bottom:10px; padding-bottom:5px; border-bottom:1px dashed #00aaff55;">AUTEUR: <span style="color:#ffaa00">${art.author}</span> | CLASSIFICATION: <span style="color:#ffaa00">${art.clearance}</span></div>
+                 <div style="font-size:0.8rem; line-height:1.5; color:#ddd; white-space:pre-wrap;">${art.content}</div>`, 
+            480, 360);
+        };
+        listEl.appendChild(item);
+      });
+    } catch (e) {
+      console.error(e);
+      listEl.innerHTML = '<div style="font-size:0.7rem; color:#ff3333;">ERREUR CONNEXION SERVEUR.</div>';
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     boot();
     initClock();
     ArticleReport.init();
+    initSidebarArticles();
   });
 })();

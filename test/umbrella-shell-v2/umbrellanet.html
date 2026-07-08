@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UmbrellaNet - Intranet Browser</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/umbrellanet.css">
+</head>
+<body>
+    <div id="bg-grid"></div>
+    <div id="scanline"></div>
+    <div id="vignette"></div>
+
+    <div class="un-container">
+        <header class="un-header">
+            <div class="brand">UMBRELLANET<span>::</span>SECURE INTRANET
+                <small>CLASSIFIED DOCUMENT ARCHIVE ACCESS</small>
+            </div>
+            <div class="clearance">
+                <div><span class="dot"></span><b>NETWORK CONNECTED</b></div>
+                <div>ACCESS LEVEL: VERIFIED</div>
+            </div>
+        </header>
+
+        <main class="un-layout">
+            <aside class="un-sidebar">
+                <h3>INDEX DES DOCUMENTS</h3>
+                <div class="un-article-list" id="article-list">
+                    <div class="loading">CHARGEMENT DES ARCHIVES...</div>
+                </div>
+            </aside>
+
+            <section class="un-viewer">
+                <div class="un-viewer-header" id="viewer-header">
+                    <h2>SÉLECTIONNEZ UN DOCUMENT</h2>
+                    <div class="un-meta" id="viewer-meta">EN ATTENTE...</div>
+                </div>
+                <div class="un-viewer-body" id="viewer-body">
+                    Veuillez sélectionner un document dans l'index à gauche pour afficher son contenu sécurisé.
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const listEl = document.getElementById('article-list');
+            const viewerHeader = document.getElementById('viewer-header');
+            const viewerMeta = document.getElementById('viewer-meta');
+            const viewerBody = document.getElementById('viewer-body');
+            
+            let articles = [];
+
+            try {
+                const res = await fetch('/api/articles');
+                if (!res.ok) throw new Error('API introuvable');
+                articles = await res.json();
+                
+                listEl.innerHTML = '';
+                if (articles.length === 0) {
+                    listEl.innerHTML = '<div class="empty">Aucun document classifié disponible.</div>';
+                }
+
+                articles.forEach((art, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'un-list-item';
+                    item.innerHTML = `
+                        <div class="un-item-title">${art.title}</div>
+                        <div class="un-item-meta">${art.clearance} | ${art.created_at.split(' ')[0]}</div>
+                    `;
+                    item.onclick = () => {
+                        document.querySelectorAll('.un-list-item').forEach(el => el.classList.remove('active'));
+                        item.classList.add('active');
+                        displayArticle(art);
+                    };
+                    listEl.appendChild(item);
+                });
+
+            } catch (err) {
+                console.error(err);
+                listEl.innerHTML = '<div class="error">ERREUR RÉSEAU: IMPOSSIBLE DE JOINDRE LE SERVEUR SECRETS.</div>';
+            }
+
+            function displayArticle(art) {
+                viewerHeader.querySelector('h2').textContent = art.title;
+                viewerMeta.innerHTML = `AUTEUR: <span class="highlight">${art.author}</span> | CLASSIFICATION: <span class="highlight">${art.clearance}</span> | DATE: ${art.created_at}`;
+                
+                // Effet d'affichage progressif (typewriter partiel)
+                viewerBody.innerHTML = '';
+                const lines = art.content.split('\\n');
+                let htmlContent = '';
+                lines.forEach(line => {
+                    htmlContent += line + '<br><br>';
+                });
+                
+                viewerBody.innerHTML = htmlContent;
+                viewerBody.classList.remove('fade-in');
+                void viewerBody.offsetWidth; // trigger reflow
+                viewerBody.classList.add('fade-in');
+            }
+        });
+    </script>
+</body>
+</html>

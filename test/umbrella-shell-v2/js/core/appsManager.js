@@ -207,6 +207,7 @@ const UmbrellaApps = {
             network:   () => AppNetwork.openEmbedded(),
             decryptor: () => AppDecrypter.openEmbedded(),
             allessa:   () => AppAllessa.openEmbedded(),
+            umbrellanet:() => AppUmbrellaNet.openEmbedded(),
         };
         if (handlers[appName]) handlers[appName]();
     },
